@@ -1,0 +1,10 @@
+<configuration>
+  <property>
+    <name>fs.alluxio.impl</name>
+    <value>alluxio.hadoop.FileSystem</value>
+  </property>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>alluxio://localhost:19998</value>
+  </property>
+</configuration>

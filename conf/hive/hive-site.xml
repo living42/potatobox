@@ -1,0 +1,24 @@
+<configuration>
+  <property>
+    <name>hive.metastore.uris</name>
+    <value>thrift://127.0.0.1:9083</value>
+  </property>
+  <property>
+    <name>hive.metastore.db.type</name>
+    <value>DERBY</value>
+  </property>
+  <property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>org.apache.derby.jdbc.EmbeddedDriver</value>
+    <description>Driver class name for a JDBC metastore</description>
+  </property>
+  <property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:derby:;databaseName=/var/lib/hive/metastore_db;create=true</value>
+  </property>
+  <property>
+    <!-- https://community.hortonworks.com/content/supportkb/247055/errorjavalangunsupportedoperationexception-storage.html -->
+    <name>metastore.storage.schema.reader.impl</name>
+    <value>org.apache.hadoop.hive.metastore.SerDeStorageSchemaReader</value>
+ </property>
+</configuration>
