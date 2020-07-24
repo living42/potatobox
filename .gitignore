@@ -1,4 +1,1 @@
 .vscode/
-deploy/.terraform/
-deploy/terraform.tfstate
-deploy/terraform.tfstate.backup

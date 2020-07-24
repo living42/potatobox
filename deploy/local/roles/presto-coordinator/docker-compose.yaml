@@ -1,0 +1,15 @@
+version: "2"
+services:
+  coordinator:
+    image: ${IMAGE_PREFIX}/presto:${IMAGE_TAG}
+    network_mode: host
+    volumes:
+      - ../../conf/presto-coordinator:/opt/presto/etc:ro
+      - /var/lib/presto:/var/lib/presto
+      - /var/lib/alluxio:/var/lib/alluxio
+      - /var/log/alluxio:/var/log/alluxio
+      - ../../conf/hive/hive-site.xml:/opt/hive/conf/hive-site.xml:ro
+      - ../../conf/hadoop/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml:ro
+      - ../../conf/alluxio/alluxio-site.properties:/opt/alluxio/conf/alluxio-site.properties:ro
+    command: /opt/presto/bin/launcher run
+    restart: unless-stopped

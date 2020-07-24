@@ -1,0 +1,12 @@
+version: "2"
+services:
+  job-master:
+    image: ${IMAGE_PREFIX}/alluxio:${IMAGE_TAG}
+    network_mode: host
+    volumes:
+      - /var/lib/alluxio:/var/lib/alluxio
+      - /var/log/alluxio:/var/log/alluxio
+      - ../../conf/alluxio/alluxio-site.properties:/opt/alluxio/conf/alluxio-site.properties:ro
+    command: alluxio-start.sh -w job_master
+    stop_grace_period: 1m
+    restart: unless-stopped

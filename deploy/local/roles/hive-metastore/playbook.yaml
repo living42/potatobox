@@ -1,0 +1,78 @@
+- hosts: all
+  become: yes
+  become_user: root
+  tasks:
+    - name: create workspace
+      file:
+        dest: /home/vagrant/potatobox/roles/hive-metastore
+        state: directory
+        owner: vagrant
+        group: vagrant
+
+    - name: copy docker-compose.yaml
+      copy:
+        src: docker-compose.yaml
+        dest: /home/vagrant/potatobox/roles/hive-metastore
+        owner: vagrant
+        group: vagrant
+
+    - name: put .env
+      copy:
+        content: |
+          IMAGE_PREFIX={{ image_prefix }}
+          IMAGE_TAG={{ image_tag }}
+        dest: /home/vagrant/potatobox/roles/hive-metastore/.env
+        owner: vagrant
+        group: vagrant
+
+    - name: create alluxio conf directory
+      file:
+        dest: /home/vagrant/potatobox/conf/alluxio
+        state: directory
+        owner: vagrant
+        group: vagrant
+
+    - name: put alluxio-site.properties
+      template:
+        src: ../../conf/alluxio/alluxio-site.properties
+        dest: /home/vagrant/potatobox/conf/alluxio/alluxio-site.properties
+        owner: vagrant
+        group: vagrant
+
+    - name: create hadoop conf directory
+      file:
+        dest: /home/vagrant/potatobox/conf/hadoop
+        state: directory
+        owner: vagrant
+        group: vagrant
+
+    - name: put core-site.xml
+      template:
+        src: ../../conf/hadoop/core-site.xml
+        dest: /home/vagrant/potatobox/conf/hadoop/core-site.xml
+        owner: vagrant
+        group: vagrant
+
+    - name: create hive conf directory
+      file:
+        dest: /home/vagrant/potatobox/conf/hive
+        state: directory
+        owner: vagrant
+        group: vagrant
+
+    - name: put hive-site.xml
+      template:
+        src: ../../conf/hive/hive-site.xml
+        dest: /home/vagrant/potatobox/conf/hive/hive-site.xml
+        owner: vagrant
+        group: vagrant
+
+    - name: Init/Upgrade schema
+      script:
+        cmd: upgrade-schema.sh
+        chdir: /home/vagrant/potatobox/roles/hive-metastore
+
+    - name: Restart
+      shell:
+        cmd: docker-compose --no-ansi stop; docker-compose --no-ansi up -d
+        chdir: /home/vagrant/potatobox/roles/hive-metastore
