@@ -41,6 +41,17 @@ RUN set -xeu; \
     chmod +x /usr/bin/presto; \
     rm -rf /tmp/dl;
 
+# THIS IS TEMPORARY SOLUTION
+# Install master branch of Apache Hudi, for alluxio filesystem support
+# we use jitpack.io to get the artifact from specific commit
+ARG HUDI_COMMIT_ID=0cb24e4a2defd8e639437b6cd145a26f038ef1af
+RUN set -xeu; \
+    echo ping jitpack to build specific version by commit id; \
+    wget -O- https://jitpack.io/com/github/apache/hudi/hudi-presto-bundle/${HUDI_COMMIT_ID}/hudi-presto-bundle-${HUDI_COMMIT_ID}.pom; \
+    echo downloading hudi-presto-bundle; \
+    wget https://jitpack.io/com/github/apache/hudi/hudi-presto-bundle/${HUDI_COMMIT_ID}/hudi-presto-bundle-${HUDI_COMMIT_ID}.jar \
+        -O /opt/presto/plugin/hive-hadoop2/hudi-presto-bundle-${HUDI_COMMIT_ID}.jar
+
 # replace newer version of alluxio-client
 COPY --from=alluxio /tmp/alluxio-client/* /opt/presto/plugin/hive-hadoop2/
 RUN rm /opt/presto/plugin/hive-hadoop2/alluxio-shaded-client-*.jar
