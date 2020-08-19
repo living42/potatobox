@@ -1,0 +1,67 @@
+// TODO create EcsImage task type
+// TODO check ecs image is up to date by check image from alicloud
+// TODO check and install aliyun command
+
+task build_ecs_basic_image {
+  inputs.dir "image/basic"
+  // TODO inputs.property("profile", profile)
+  // TODO inputs.property("region", region)
+  def imageIdLocation = "$buildDir/image/ecs_basic_image/id"
+  outputs.file imageIdLocation
+
+  doLast {
+    exec {
+      def buildLogLocation = "$buildDir/image/ecs_basic_image/build.log"
+      def buildLog = new FileOutputStream(buildLogLocation)
+      standardOutput = buildLog
+      errorOutput = buildLog
+      workingDir "image/basic"
+      commandLine "bash", "-ec", """
+      packer build -machine-readable template.json
+      fgrep ',alicloud-ecs,artifact,0,id' $buildLogLocation | cut -d : -f2 > $imageIdLocation
+      """
+    }
+  }
+  finalizedBy "remove_old_ecs_basic_image"
+}
+
+task remove_old_ecs_basic_image {
+  doLast {
+    println("TODO clean old basic image")
+  }
+}
+
+
+task build_ecs_image {
+  dependsOn ":image:push"
+  inputs.dir "image/containers"
+  inputs.files build_ecs_basic_image.outputs.files
+  // TODO inputs.property("profile", profile)
+  // TODO inputs.property("region", region)
+  def imageIdLocation = "$buildDir/image/ecs_image/id"
+  outputs.file imageIdLocation
+
+  doLast {
+    exec {
+      def buildLogLocation = "$buildDir/image/ecs_image/build.log"
+      def buildLog = new FileOutputStream(buildLogLocation)
+      standardOutput = buildLog
+      errorOutput = buildLog
+      workingDir "image/containers"
+      commandLine "bash", "-ec", """
+      export cr_temp_user_password=\$(aliyun cr GetAuthorizationToken | jq -r .data.authorizationToken)
+      export source_image=\$(cat $buildDir/image/ecs_basic_image/id)
+      packer build -machine-readable template.json
+      fgrep ',alicloud-ecs,artifact,0,id' $buildLogLocation | cut -d : -f2 > $imageIdLocation
+      """
+    }
+  }
+
+  finalizedBy "remove_old_ecs_image"
+}
+
+task remove_old_ecs_image {
+  doLast {
+    println("TODO clean clean old image")
+  }
+}

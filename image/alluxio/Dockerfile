@@ -1,8 +1,6 @@
-ARG BASE_IMAGE
+FROM openjdk:8u265
 
-FROM ${BASE_IMAGE}
-
-ARG ALLUXIO_VERSION
+ARG ALLUXIO_VERSION=2.3.0
 
 RUN set -xeu; \
     mkdir /tmp/dl; \

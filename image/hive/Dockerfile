@@ -2,8 +2,8 @@ ARG BASE_IMAGE
 
 FROM ${BASE_IMAGE}
 
-ARG HIVE_VERSION
-ARG APACHE_DIST_MIRROR
+ARG HIVE_VERSION=3.1.2
+ARG APACHE_DIST_MIRROR=https://mirrors.aliyun.com/apache
 
 RUN set -xeu; \
     mkdir /tmp/dl; \

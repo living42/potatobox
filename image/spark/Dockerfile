@@ -1,9 +1,7 @@
+ARG ALLUXIO_IMAGE
 ARG BASE_IMAGE
 
-ARG IMAGE_PREFIX
-ARG IMAGE_TAG
-
-FROM ${IMAGE_PREFIX}/alluxio:${IMAGE_TAG} as alluxio
+FROM ${ALLUXIO_IMAGE} as alluxio
 
 RUN set -xeu;\
     mkdir /tmp/alluxio-client; \
@@ -11,11 +9,9 @@ RUN set -xeu;\
 
 FROM ${BASE_IMAGE}
 
-FROM ${BASE_IMAGE}
+ARG APACHE_DIST_MIRROR=https://mirrors.aliyun.com/apache
 
-ARG APACHE_DIST_MIRROR
-
-ARG SPARK2_VERSION
+ARG SPARK2_VERSION=2.4.6
 
 RUN set -xeu; \
     mkdir /tmp/dl; \
@@ -27,7 +23,7 @@ RUN set -xeu; \
     mv spark-${SPARK2_VERSION}-bin-without-hadoop /opt/spark; \
     rm -rf /tmp/dl
 
-ARG SPARK3_VERSION
+ARG SPARK3_VERSION=3.0.0
 
 RUN set -xeu; \
     mkdir /tmp/dl; \

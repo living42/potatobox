@@ -1,18 +1,14 @@
-ARG BASE_IMAGE
+ARG ALLUXIO_IMAGE
 
-ARG IMAGE_PREFIX
-ARG IMAGE_TAG
-
-FROM ${IMAGE_PREFIX}/alluxio:${IMAGE_TAG} as alluxio
+FROM ${ALLUXIO_IMAGE} as alluxio
 
 RUN set -xeu;\
     mkdir /tmp/alluxio-client; \
     cp /opt/alluxio/client/alluxio-*-client.jar /tmp/alluxio-client;
 
-FROM ${BASE_IMAGE}
+FROM openjdk:11.0.8
 
-ARG PRESTO_VERSION
-ARG APACHE_DIST_MIRROR
+ARG PRESTO_VERSION=339
 
 RUN set -xeu; \
     mkdir /tmp/dl; \

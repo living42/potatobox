@@ -1,8 +1,8 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-ARG HADOOP_VERSION
-ARG APACHE_DIST_MIRROR
+ARG HADOOP_VERSION=3.2.1
+ARG APACHE_DIST_MIRROR=https://mirrors.aliyun.com/apache
 
 RUN set -xeu; \
     apt-get update; \
