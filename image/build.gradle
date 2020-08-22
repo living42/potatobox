@@ -215,6 +215,18 @@ task push_spark {
 
 build.finalizedBy build_alluxio, build_hadoop, build_hive, build_presto, build_spark
 
+task login_docker_registry {
+  doLast {
+    exec {
+      commandLine "bash", "-c", "aliyun cr GetAuthorizationToken | jq -r .data.authorizationToken | docker login -u cr_temp_user registry.cn-shanghai.aliyuncs.com --password-stdin > /dev/null"
+    }
+  }
+}
+
+tasks.findAll { task -> task.name.startsWith('push_') } each {
+  it.dependsOn login_docker_registry
+}
+
 task push {
-  dependsOn push_alluxio, push_hadoop, push_hive, push_presto, push_spark
+  dependsOn tasks.findAll { task -> task.name.startsWith('push_') }
 }
