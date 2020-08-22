@@ -13,6 +13,7 @@
       "source_image": "centos_7_8_x64_20G_alibase_20200717.vhd",
       "ssh_username": "root",
       "instance_type": "ecs.n1.tiny",
+      "instance_name": "potatobox_basic_image_builder",
       "io_optimized": true,
       "internet_charge_type": "PayByTraffic",
       "image_force_delete": true,
@@ -30,8 +31,20 @@
   "provisioners": [
     {
       "type": "shell",
-      "pause_before": "30s",
-      "script": "setup.sh"
+      "inline": "true",
+      "pause_before": "30s"
+    },
+    {
+      "type": "file",
+      "source": "setup",
+      "destination": "/tmp/setup"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "chmod +x -R /tmp/setup",
+        "cd /tmp/setup && for script in $(ls *.sh); do echo start execute $script; ./$script; echo end execute $script; done; rm -rf /tmp/setup"
+      ]
     }
   ]
 }

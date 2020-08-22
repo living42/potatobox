@@ -34,7 +34,7 @@ task remove_old_ecs_basic_image {
 
 task build_ecs_image {
   dependsOn ":image:push"
-  inputs.dir "image/containers"
+  inputs.dir "image/main"
   inputs.files build_ecs_basic_image.outputs.files
   // TODO inputs.property("profile", profile)
   // TODO inputs.property("region", region)
@@ -47,7 +47,7 @@ task build_ecs_image {
       def buildLog = new FileOutputStream(buildLogLocation)
       standardOutput = buildLog
       errorOutput = buildLog
-      workingDir "image/containers"
+      workingDir "image/main"
       commandLine "bash", "-ec", """
       export cr_temp_user_password=\$(aliyun cr GetAuthorizationToken | jq -r .data.authorizationToken)
       export source_image=\$(cat $buildDir/image/ecs_basic_image/id)
