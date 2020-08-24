@@ -3,12 +3,10 @@ set -eu
 
 CONSUL_VERSION=1.8.3
 
-yum install -y yum-utils
-yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 
-found_version=$(yum list --showduplicates consul | grep $CONSUL_VERSION | tail -n 1 | awk '{print $2}')
-if [ -z "$found_version" ]; then
-    echo "consul version $CONSUL_VERSION is not found"
-fi
+echo "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main" > /etc/apt/sources.list.d/hashicorp.list
 
-yum install -y consul-$found_version
+apt-get update
+
+apt-get install -y consul=$CONSUL_VERSION

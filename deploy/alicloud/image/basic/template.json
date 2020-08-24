@@ -10,7 +10,7 @@
       "region": "{{user `region`}}",
       "profile": "{{user `profile`}}",
       "image_name": "{{user `image_name`}}",
-      "source_image": "centos_7_8_x64_20G_alibase_20200717.vhd",
+      "source_image": "debian_10_4_x64_20G_alibase_20200717.vhd",
       "ssh_username": "root",
       "instance_type": "ecs.n1.tiny",
       "instance_name": "potatobox_basic_image_builder",

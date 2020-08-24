@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eu
 
-yum install -y htop jq bind-utils
+apt-get install -y htop jq
