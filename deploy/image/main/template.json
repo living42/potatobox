@@ -1,8 +1,10 @@
 {
   "variables": {
-    "image_name": "potatobox_v1_basic_{{isotime `200601021504`}}",
-    "profile": "akProfile",
-    "region": "cn-shanghai"
+    "cr_temp_user_password": "{{env `cr_temp_user_password`}}",
+    "source_image": "{{env `source_image`}}",
+    "image_name": "potatobox_v1_{{isotime `200601021504`}}",
+    "profile": "{{env `ALICLOUD_PROFILE`}}",
+    "region": "{{env `ALICLOUD_REGION`}}"
   },
   "builders": [
     {
@@ -10,10 +12,10 @@
       "region": "{{user `region`}}",
       "profile": "{{user `profile`}}",
       "image_name": "{{user `image_name`}}",
-      "source_image": "debian_10_4_x64_20G_alibase_20200717.vhd",
+      "source_image": "{{user `source_image`}}",
       "ssh_username": "root",
       "instance_type": "ecs.n1.tiny",
-      "instance_name": "potatobox_basic_image_builder",
+      "instance_name": "potatobox_image_builder",
       "io_optimized": true,
       "internet_charge_type": "PayByTraffic",
       "image_force_delete": true,
@@ -31,8 +33,13 @@
   "provisioners": [
     {
       "type": "shell",
-      "inline": "true",
-      "pause_before": "30s"
+      "pause_before": "30s",
+      "inline": "mkdir -p /usr/local/share/potatobox"
+    },
+    {
+      "type": "file",
+      "source": "scripts",
+      "destination": "/usr/local/share/potatobox/scripts"
     },
     {
       "type": "file",
@@ -41,6 +48,9 @@
     },
     {
       "type": "shell",
+      "environment_vars": [
+        "CR_TEMP_USER_PASSWORD={{user `cr_temp_user_password`}}"
+      ],
       "inline": [
         "chmod +x -R /tmp/setup",
         "cd /tmp/setup && for script in $(ls *.sh); do echo start execute $script; ./$script; echo end execute $script; done; rm -rf /tmp/setup"

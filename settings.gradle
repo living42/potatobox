@@ -10,4 +10,4 @@
 rootProject.name = 'potatobox'
 
 include "image"
-include "deploy:alicloud"
+include "deploy"
