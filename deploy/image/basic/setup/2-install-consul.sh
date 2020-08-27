@@ -38,3 +38,14 @@ echo "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) mai
 auto_retry 10 120 apt-get update
 
 auto_retry 10 120 apt-get install -y consul=$CONSUL_VERSION
+
+# Install Consul Template
+
+CONSUL_TEMPLATE_VERSION=0.25.1
+
+auto_retry 10 120 \
+    wget -O consul-template.tgz \
+        https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.tgz
+
+tar xf consul-template.tgz -C /usr/local/bin/
+rm -rf consul-template.tgz
