@@ -14,5 +14,35 @@ sleep 5
 # Install Docker Compose
 # todo copy from container image docker/compose:$VERSION
 DOCKER_COMPOSE_VERSION=${DOCKER_COMPOSE_VERSION:-1.26.2}
-wget -O /usr/local/bin/docker-compose "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)"
+
+auto_retry() {
+    max_attempts=$1
+    shift
+    retry_wait=$1
+    shift
+    cmd=$@
+
+    attempt=0
+    while true; do
+        attempt=$(($attempt+1))
+        ($cmd)
+        rc=$?
+        if [ $rc -eq 0 ]; then
+            break
+        fi
+
+        if [ $attempt -le $max_attempts ]; then
+            echo "retry later (attempt: $attempt)"
+            sleep $retry_wait
+        else
+            echo "too many retry (attempt: $attempt)"
+            return $rc
+        fi
+    done
+}
+
+auto_retry 10 120 \
+    wget -O /usr/local/bin/docker-compose \
+        "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)"
+
 chmod +x /usr/local/bin/docker-compose
