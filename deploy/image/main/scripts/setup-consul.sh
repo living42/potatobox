@@ -36,16 +36,6 @@ EOF
   chmod 600 /etc/consul.d/consul.hcl
 
   setup_systemd_service
-
-  check_deadline=$(($(date +%s) + 60))
-  until [ "$(curl -sS localhost:8500/v1/status/peers | jq length)" = "$BOOTSTRAP_EXPECT" ]; do
-    if [ "$(date +%s)" -ge "$check_deadline" ]; then
-      echo "consul did not up"
-      exit 1
-    fi
-    echo "waiting consul servers up"
-    sleep 1
-  done
 }
 
 setup_client () {
@@ -101,6 +91,18 @@ EOF
   systemctl start consul
 }
 
+wait_agent_up() {
+  check_deadline=$(($(date +%s) + 60))
+  until consul members; do
+    if [ "$(date +%s)" -ge "$check_deadline" ]; then
+      echo "consul did not up"
+      exit 1
+    fi
+    echo "waiting consul servers up"
+    sleep 1
+  done
+}
+
 setup_dns_server() {
   # Modify resolv.conf to forward dns lookup into consul, so we can use hostname
   # to communicate each other, further use service name to
@@ -122,14 +124,15 @@ TYPE=$1
 case $TYPE in
   server)
     setup_server "$2" "$3"
-    setup_dns_server
   ;;
   client)
     setup_client "$2"
-    setup_dns_server
   ;;
   *)
     echo "invalid TYPE $TYPE"
     exit 1
   ;;
 esac
+
+setup_dns_server
+wait_agent_up

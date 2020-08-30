@@ -2,4 +2,4 @@
 set -eu
 BASE_DIR=$(realpath $(dirname $BASH_SOURCE[0]))
 
-exec ssh -F $BASE_DIR/.keys/ssh_config $@
+exec ssh -F $BASE_DIR/.secrets/ssh_config $@

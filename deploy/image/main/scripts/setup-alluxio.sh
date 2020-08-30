@@ -27,8 +27,7 @@ for role in $ROLES; do
     cat <<EOF > ${SERVICE_DEF}
 {
     "service": {
-        "name": "alluxio_${role}",
-        "tags": ["alluxio"]
+        "name": "alluxio_${role}"
     }
 }
 EOF

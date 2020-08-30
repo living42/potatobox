@@ -68,7 +68,7 @@ task remove_old_ecs_image {
 
 task generate_terraform {
   inputs.files build_ecs_image.outputs.files
-  outputs.file "$projectDir/terraform/generated.json"
+  outputs.file "$projectDir/terraform/.generated.auto.tfvars.json"
 
   doLast {
     exec {
