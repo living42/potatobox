@@ -30,6 +30,7 @@ server = true
 bootstrap_expect = ${BOOTSTRAP_EXPECT}
 bind_addr = "{{ GetInterfaceIP \"eth0\" }}"
 retry_join = ${CONSUL_SERVER_ADDRS}
+enable_local_script_checks = true
 EOF
 
   chown consul:consul /etc/consul.d/consul.hcl
@@ -60,6 +61,7 @@ ports = {
 server = false
 bind_addr = "{{ GetInterfaceIP \"eth0\" }}"
 retry_join = ${CONSUL_SERVER_ADDRS}
+enable_local_script_checks = true
 EOF
 
   chown consul:consul /etc/consul.d/consul.hcl
@@ -81,6 +83,8 @@ ExecStart=/usr/bin/consul agent -config-dir /etc/consul.d
 ExecStop=/usr/bin/consul leave
 ExecReload=/usr/bin/consul reload
 AmbientCapabilities=CAP_NET_BIND_SERVICE
+Restart=on-failure
+RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
@@ -93,7 +97,7 @@ EOF
 
 wait_agent_up() {
   check_deadline=$(($(date +%s) + 60))
-  until consul members; do
+  until (consul kv put .test/$(hostname) 1 && consul kv delete .test/$(hostname)); do
     if [ "$(date +%s)" -ge "$check_deadline" ]; then
       echo "consul did not up"
       exit 1
@@ -134,5 +138,5 @@ case $TYPE in
   ;;
 esac
 
-setup_dns_server
 wait_agent_up
+setup_dns_server

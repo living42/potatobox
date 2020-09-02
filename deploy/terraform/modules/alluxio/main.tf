@@ -194,6 +194,8 @@ resource "alicloud_disk_attachment" "master_disk_attachment" {
 resource "alicloud_instance" "workers" {
   for_each = var.worker_instances
 
+  depends_on = [alicloud_instance.masters]
+
   instance_name        = each.key
   image_id             = var.ecs_image_id
   instance_type        = each.value.instance_type

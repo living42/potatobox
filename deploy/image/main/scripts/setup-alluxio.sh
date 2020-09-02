@@ -9,53 +9,135 @@ UFS_OSS_ACCESS_KEY_SECRET=$5
 UFS_OSS_ENDPOINT=$6
 UFS_OSS_BUCKET=$7
 
+
+SERVICE_DIR=/root/services/alluxio
+mkdir -p $SERVICE_DIR
+cd $SERVICE_DIR
+
+CHECK_HEALTH_SCRIPT=$SERVICE_DIR/check-health.sh
+
+cat <<EOF > $CHECK_HEALTH_SCRIPT
+#!/bin/sh
+set -ue
+role=\$1
+
+date --rfc-3339=seconds
+exec docker exec "alluxio_\$role" alluxio-monitor.sh "\$role"
+EOF
+chmod a+x $CHECK_HEALTH_SCRIPT
+
+cat <<EOF > /etc/sudoers.d/consul-alluxio-health-check
+consul ALL=(root) NOPASSWD: $CHECK_HEALTH_SCRIPT
+EOF
+
+TAG_LEADER_SCRIPT=$SERVICE_DIR/tag-leader.sh
+
+cat <<EOF > $TAG_LEADER_SCRIPT
+#!/bin/sh
+set -ue
+role=\$1
+service_def=\$2
+
+date --rfc-3339=seconds > /dev/stderr
+
+case \$role in
+        master)
+                tag_name=leader
+                get_leader_cmd="alluxio fs leader"
+                ;;
+        job_master)
+                tag_name=job_leader
+                get_leader_cmd="alluxio job leader"
+                ;;
+        *)
+                echo "invalid role"
+                exit 1
+                ;;
+esac
+
+leader=\$(docker exec "alluxio_\$role" \$get_leader_cmd)
+echo "leader" \$leader > /dev/stderr
+
+if [ "\$leader" = "\$(hostname)" ]; then
+        tags="(.service.tags + [\"\$tag_name\"])"
+else
+        tags="(.service.tags - [\"\$tag_name\"])"
+fi
+
+
+old=\$(cat \$service_def)
+new=\$(cat \$service_def | jq "{service: (.service + {tags: \$tags | unique})}")
+
+if [ "\$old" != "\$new" ]; then
+        echo "\$new" > \$service_def
+        consul reload
+fi
+EOF
+chmod a+x $TAG_LEADER_SCRIPT
+
+cat <<EOF > /etc/sudoers.d/consul-alluxio-tag-leader
+consul ALL=(root) NOPASSWD: $TAG_LEADER_SCRIPT
+EOF
+
 # register service
 
-# TODO register checks
+SERVICE_DEF=/etc/consul.d/alluxio.json
 
-for role in $ROLES; do
-    case $role in
-        master | job_master | worker| job_worker)
-        ;;
-        *)
-        echo "Unknown role $role to provision"
-        exit 1
-        ;;
-    esac
+SERVICE_JSON='{"name": "alluxio", "tags": [], "checks": []}'
+python <<EOF
+import sys, json
 
-    SERVICE_DEF=/etc/consul.d/alluxio_${role}.json
-    cat <<EOF > ${SERVICE_DEF}
-{
-    "service": {
-        "name": "alluxio_${role}"
-    }
-}
+ROLES = "$ROLES".split()
+SERVICE_DEF = "$SERVICE_DEF"
+CHECK_HEALTH_SCRIPT = "$CHECK_HEALTH_SCRIPT"
+TAG_LEADER_SCRIPT = "$TAG_LEADER_SCRIPT"
+
+service = {"name": "alluxio", "tags": [], "checks": []}
+
+service["tags"].extend(ROLES)
+
+service["checks"].extend([
+    {
+        "name": "alluxio-monitor.sh %s" % role,
+        "args": ["sudo", CHECK_HEALTH_SCRIPT, role],
+        "interval": "30s",
+        "status": "passing"
+    } for role in ROLES
+])
+
+service["checks"].extend([
+    {
+        "name": "tag %s leader" % role,
+        "args": ["sudo", TAG_LEADER_SCRIPT, role, SERVICE_DEF],
+        "interval": "30s",
+        "status": "passing"
+    } for role in ROLES
+    if role in {"master", "job_master"}
+])
+
+with open(SERVICE_DEF, "w") as f:
+    json.dump({"service": service}, f, indent=2)
 EOF
-    chown consul:consul $SERVICE_DEF
-    chmod 600 $SERVICE_DEF
-done
 
+chown consul:consul $SERVICE_DEF
+chmod 600 $SERVICE_DEF
 consul reload
 
-echo "checking alluxio_master service"
-deadline=$(($(date +%s)+30))
+echo "checking master nodes"
+deadline=$(($(date +%s)+60))
 while true; do
-    count=$(consul catalog nodes -service alluxio_master | awk 'NR!=1{print $1}' | wc -l)
+    count=$(curl -sS localhost:8500/v1/catalog/service/alluxio\?tag=master | jq 'length')
     if [ "$count" -ge "$NUMBER_OF_MASTER" ]; then
-        echo "$count alluxio_master are registered"
+        echo "$count master nodes are registered"
         break
     else
         if [ $(date +%s) -ge "$deadline" ]; then
-            echo "deadline exceeded for checking alluxio_master service"
+            echo "deadline exceeded for checking master nodes"
             exit 1
         fi
         sleep 1
     fi
 done
-
-SERVICE_DIR=/root/services/alluxio
-mkdir -p $SERVICE_DIR
-cd $SERVICE_DIR
 
 
 cat <<EOF > docker-compose.yaml
@@ -102,7 +184,7 @@ done
 # run alluxio client (will, at least don't put any sensitive data in here)
 
 cat <<EOF > alluxio-site.properties.tpl
-{{ with service "alluxio_master|any" -}}
+{{ with service "master.alluxio|any" -}}
 {{ if eq 1 (len .) -}}
 # single master setup
 alluxio.master.hostname={{ (index . 0).Node }}
@@ -112,7 +194,7 @@ alluxio.master.hostname=$(hostname)
 alluxio.master.embedded.journal.addresses={{ range \$index, \$item := . }}{{ if ne 0 \$index}},{{ end }}{{ \$item.Node }}:19200{{ end }}
 {{ end }}
 {{ else -}}
-# cannot found alluxio_master service, please make sure you have registered this service
+# cannot found master node, please make sure you have registered this service
 {{ end -}}
 
 alluxio.worker.tieredstore.level0.alias=SSD
