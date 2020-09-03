@@ -68,13 +68,15 @@ task remove_old_ecs_image {
 
 task generate_terraform {
   inputs.files build_ecs_image.outputs.files
+  inputs.files build_ecs_basic_image.outputs.files
   outputs.file "$projectDir/terraform/.generated.auto.tfvars.json"
 
   doLast {
     exec {
       def id = file("$buildDir/image/ecs_image/id").getText().trim()
+      def basic_id = file("$buildDir/image/ecs_basic_image/id").getText().trim()
       standardOutput = new FileOutputStream("$projectDir/terraform/.generated.auto.tfvars.json")
-      commandLine "jq", "-n", """{ecs_image_id: "$id"}"""
+      commandLine "jq", "-n", """{ecs_basic_image_id: "$basic_id", ecs_image_id: "$id"}"""
     }
   }
 }

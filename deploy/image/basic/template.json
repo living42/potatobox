@@ -31,8 +31,13 @@
   "provisioners": [
     {
       "type": "shell",
-      "inline": "true",
-      "pause_before": "30s"
+      "pause_before": "30s",
+      "inline": "mkdir -p /root/scripts"
+    },
+    {
+      "type": "file",
+      "source": "scripts/",
+      "destination": "/root/scripts"
     },
     {
       "type": "file",

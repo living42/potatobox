@@ -8,6 +8,10 @@ variable "environment" {
   default = "testing"
 }
 
+variable "ecs_basic_image_id" {
+  type = string
+}
+
 variable "ecs_image_id" {
   type = string
 }

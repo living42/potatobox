@@ -2,51 +2,6 @@ provider "alicloud" {
   version = "~> 1.93"
 }
 
-module "vpc" {
-  source = "alibaba/vpc/alicloud"
-  region = "cn-shanghai"
-
-  create   = true
-  vpc_name = var.project
-  vpc_cidr = "172.16.0.0/16"
-
-  availability_zones = ["cn-shanghai-e", "cn-shanghai-f", "cn-shanghai-g"]
-  vswitch_cidrs      = ["172.16.105.0/24", "172.16.106.0/24", "172.16.107.0/24"]
-  vswitch_name       = "${var.project}-"
-
-  vpc_tags     = local.common_tags
-  vswitch_tags = local.common_tags
-}
-
-resource "alicloud_security_group" "default" {
-  name                = "${var.project}-default"
-  description         = "Default Policy for project ${var.project}"
-  tags                = local.common_tags
-  vpc_id              = module.vpc.this_vpc_id
-  inner_access_policy = "Accept"
-}
-
-resource "alicloud_security_group_rule" "allow_ssh" {
-  type              = "ingress"
-  ip_protocol       = "tcp"
-  nic_type          = "intranet"
-  policy            = "accept"
-  port_range        = "22/22"
-  priority          = 1
-  security_group_id = alicloud_security_group.default.id
-  cidr_ip           = "0.0.0.0/0"
-}
-
-resource "alicloud_security_group_rule" "allow_ping" {
-  type              = "ingress"
-  ip_protocol       = "icmp"
-  nic_type          = "intranet"
-  policy            = "accept"
-  priority          = 1
-  security_group_id = alicloud_security_group.default.id
-  cidr_ip           = "0.0.0.0/0"
-}
-
 resource "alicloud_key_pair" "default" {
   key_name   = "${var.project}-${var.environment}"
   public_key = file("~/.ssh/aliyun-default.pub")
@@ -58,7 +13,7 @@ module "consul" {
   project     = var.project
   environment = var.environment
 
-  ecs_image_id = var.ecs_image_id
+  ecs_image_id = var.ecs_basic_image_id
   key_name     = alicloud_key_pair.default.key_name
   tags         = local.common_tags
   instances = {
@@ -160,21 +115,17 @@ module "alluxio" {
   }
 }
 
-locals {
-  servers = {
-    "consul"  = module.consul.instances,
-    "alluxio" = concat(module.alluxio.master_instances, module.alluxio.worker_instances),
-  }
-}
-
-output "servers" {
-  value = local.servers
-}
-
 resource "local_file" "ssh_config" {
   content = templatefile("ssh_config.tpl", {
     "ssh_priv_key_file" = "~/.ssh/aliyun-default"
-    "servers"           = local.servers
+    "jumpserver" = {
+      "ip" = alicloud_eip.jumpserver_eip.ip_address
+    },
+    "internal_instances" = concat(
+      module.consul.instances,
+      module.alluxio.master_instances,
+      module.alluxio.worker_instances
+    )
   })
   filename = ".secrets/ssh_config"
 }

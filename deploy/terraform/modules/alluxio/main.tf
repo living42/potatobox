@@ -129,7 +129,7 @@ resource "alicloud_instance" "masters" {
   user_data            = <<-EOT
     #!/bin/sh
     set -xe
-    SCRIPTS=/usr/local/share/potatobox/scripts
+    SCRIPTS=/root/scripts
     bash $SCRIPTS/setup-disk.sh /dev/vdb /data
     bash $SCRIPTS/setup-consul.sh client '${jsonencode(var.consul_server_addresses)}'
     bash $SCRIPTS/setup-aliyun-cli.sh
@@ -209,7 +209,7 @@ resource "alicloud_instance" "workers" {
   user_data            = <<-EOT
     #!/bin/sh
     set -xe
-    SCRIPTS=/usr/local/share/potatobox/scripts
+    SCRIPTS=/root/scripts
     bash $SCRIPTS/setup-disk.sh /dev/vdb /data
     bash $SCRIPTS/setup-consul.sh client '${jsonencode(var.consul_server_addresses)}'
     bash $SCRIPTS/setup-aliyun-cli.sh

@@ -34,12 +34,12 @@
     {
       "type": "shell",
       "pause_before": "30s",
-      "inline": "mkdir -p /usr/local/share/potatobox"
+      "inline": "mkdir -p /root/scripts"
     },
     {
       "type": "file",
-      "source": "scripts",
-      "destination": "/usr/local/share/potatobox/scripts"
+      "source": "scripts/",
+      "destination": "/root/scripts"
     },
     {
       "type": "file",

@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eu
+set -xeu
 
 # Install Docker
 DOCKER_VERSION=${DOCKER_VERSION:-19.03.10}
@@ -25,24 +25,22 @@ auto_retry() {
     attempt=0
     while true; do
         attempt=$(($attempt+1))
-        ($cmd)
-        rc=$?
-        if [ $rc -eq 0 ]; then
-            break
-        fi
-
-        if [ $attempt -le $max_attempts ]; then
-            echo "retry later (attempt: $attempt)"
-            sleep $retry_wait
-        else
-            echo "too many retry (attempt: $attempt)"
-            return $rc
-        fi
+        ($cmd) && break || {
+            rc=$?
+            if [ $attempt -le $max_attempts ]; then
+                echo "retry later (attempt: $attempt, rc: $rc)"
+                sleep $retry_wait
+                continue
+            else
+                echo "too many retry (attempt: $attempt)"
+                return $rc
+            fi
+        }
     done
 }
 
 auto_retry 10 120 \
-    wget -O /usr/local/bin/docker-compose \
+    axel -o /usr/local/bin/docker-compose \
         "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)"
 
 chmod +x /usr/local/bin/docker-compose

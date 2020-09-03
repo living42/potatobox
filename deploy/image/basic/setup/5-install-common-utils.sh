@@ -1,4 +1,4 @@
 #!/bin/sh
-set -eu
+set -xeu
 
-apt-get install -y htop jq
+apt-fast install -y htop jq

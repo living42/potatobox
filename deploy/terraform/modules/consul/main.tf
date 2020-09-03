@@ -27,7 +27,7 @@ resource "alicloud_instance" "consul_servers" {
   user_data            = <<-EOT
     #!/bin/sh
     set -xe
-    SCRIPTS=/usr/local/share/potatobox/scripts
+    SCRIPTS=/root/scripts
     bash $SCRIPTS/setup-disk.sh /dev/vdb /data
     bash $SCRIPTS/setup-aliyun-cli.sh
     bash $SCRIPTS/setup-consul.sh server /data/consul "${local.consul_server_node_tags_cli_flags}"

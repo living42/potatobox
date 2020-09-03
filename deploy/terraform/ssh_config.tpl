@@ -4,12 +4,16 @@ StrictHostKeyChecking=no
 TCPKeepAlive yes
 ServerAliveInterval 15
 
-%{for _, instances in servers ~}
-%{ for instance in instances ~}
-Host ${instance.name}
-Hostname ${instance.public_ip}
+Host jumpserver
+Hostname ${jumpserver.ip}
 User root
 IdentityFile ${ssh_priv_key_file}
 
-%{ endfor ~}
+%{ for instance in internal_instances ~}
+Host ${instance.name}
+Hostname ${instance.private_ip}
+User root
+IdentityFile ${ssh_priv_key_file}
+ProxyJump jumpserver
+
 %{ endfor ~}
