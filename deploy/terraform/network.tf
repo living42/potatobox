@@ -1,24 +1,35 @@
-module "vpc" {
-  source = "alibaba/vpc/alicloud"
-  region = "cn-shanghai"
+resource "alicloud_vpc" "main" {
+  name = "${var.project}-${var.environment}"
+  cidr_block = "172.16.0.0/16"
+  tags = local.common_tags
+}
 
-  create   = true
-  vpc_name = "${var.project}-${var.environment}"
-  vpc_cidr = "172.16.0.0/16"
+resource "alicloud_vswitch" "e" {
+  vpc_id = alicloud_vpc.main.id
+  cidr_block = "172.16.105.0/24"
+  availability_zone = "cn-shanghai-e"
+  tags = local.common_tags
+}
 
-  availability_zones = ["cn-shanghai-e", "cn-shanghai-f", "cn-shanghai-g"]
-  vswitch_cidrs      = ["172.16.105.0/24", "172.16.106.0/24", "172.16.107.0/24"]
-  vswitch_name       = "${var.project}-${var.environment}-"
+resource "alicloud_vswitch" "f" {
+  vpc_id = alicloud_vpc.main.id
+  cidr_block = "172.16.106.0/24"
+  availability_zone = "cn-shanghai-f"
+  tags = local.common_tags
+}
 
-  vpc_tags     = local.common_tags
-  vswitch_tags = local.common_tags
+resource "alicloud_vswitch" "g" {
+  vpc_id = alicloud_vpc.main.id
+  cidr_block = "172.16.107.0/24"
+  availability_zone = "cn-shanghai-g"
+  tags = local.common_tags
 }
 
 resource "alicloud_security_group" "default" {
   name                = "${var.project}-${var.environment}-default"
   description         = "Default Policy for project ${var.project}"
   tags                = local.common_tags
-  vpc_id              = module.vpc.this_vpc_id
+  vpc_id              = alicloud_vpc.main.id
   inner_access_policy = "Accept"
 }
 
@@ -26,7 +37,7 @@ resource "alicloud_security_group" "jumpserver" {
   name        = "${var.project}-${var.environment}-jumpserver"
   description = "Policy for jumpserver"
   tags        = local.common_tags
-  vpc_id      = module.vpc.this_vpc_id
+  vpc_id              = alicloud_vpc.main.id
 }
 
 resource "alicloud_security_group_rule" "allow_ssh" {
@@ -67,12 +78,13 @@ resource "alicloud_instance" "jumpserver" {
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 20
   host_name            = "jumpserver"
-  vswitch_id           = module.vpc.this_vswitch_ids[0]
+  vswitch_id           = alicloud_vswitch.e.id
   security_groups = [
     alicloud_security_group.default.id,
     alicloud_security_group.jumpserver.id
   ]
   key_name  = alicloud_key_pair.default.key_name
+
   user_data = <<-EOT
     #!/bin/sh
     set -xe

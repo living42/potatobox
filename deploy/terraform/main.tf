@@ -4,7 +4,7 @@ provider "alicloud" {
 
 resource "alicloud_key_pair" "default" {
   key_name   = "${var.project}-${var.environment}"
-  public_key = file("~/.ssh/aliyun-default.pub")
+  public_key = file(".secrets/ssh_key.pub")
 }
 
 module "consul" {
@@ -18,8 +18,8 @@ module "consul" {
   tags         = local.common_tags
   instances = {
     "consul-1" = {
-      "instance_type"      = "ecs.ic5.large",
-      "vswitch_id"         = module.vpc.this_vswitch_ids[0],
+      "instance_type"      = "ecs.s6-c1m1.small",
+      "vswitch_id"         = alicloud_vswitch.e.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
       "data_disk_size"     = 20,
@@ -27,8 +27,8 @@ module "consul" {
       "spot_price_limit"   = 0.12,
     },
     "consul-2" = {
-      "instance_type"      = "ecs.ic5.large",
-      "vswitch_id"         = module.vpc.this_vswitch_ids[1],
+      "instance_type"      = "ecs.xn4.small",
+      "vswitch_id"         = alicloud_vswitch.f.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
       "data_disk_size"     = 20,
@@ -36,8 +36,8 @@ module "consul" {
       "spot_price_limit"   = 0.12,
     },
     "consul-3" = {
-      "instance_type"      = "ecs.ic5.large",
-      "vswitch_id"         = module.vpc.this_vswitch_ids[2],
+      "instance_type"      = "ecs.s6-c1m1.small",
+      "vswitch_id"         = alicloud_vswitch.g.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
       "data_disk_size"     = 20,
@@ -75,8 +75,8 @@ module "alluxio" {
 
   master_instances = {
     "alluxio-master-1" = {
-      "instance_type"      = "ecs.ic5.large",
-      "vswitch_id"         = module.vpc.this_vswitch_ids[0],
+      "instance_type"      = "ecs.t5-lc1m2.small",
+      "vswitch_id"         = alicloud_vswitch.e.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
       "data_disk_size"     = 20,
@@ -84,8 +84,8 @@ module "alluxio" {
       "spot_price_limit"   = 0.12,
     },
     "alluxio-master-2" = {
-      "instance_type"      = "ecs.ic5.large",
-      "vswitch_id"         = module.vpc.this_vswitch_ids[1],
+      "instance_type"      = "ecs.t5-lc1m2.small",
+      "vswitch_id"         = alicloud_vswitch.f.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
       "data_disk_size"     = 20,
@@ -93,8 +93,8 @@ module "alluxio" {
       "spot_price_limit"   = 0.12,
     },
     "alluxio-master-3" = {
-      "instance_type"      = "ecs.ic5.large",
-      "vswitch_id"         = module.vpc.this_vswitch_ids[2],
+      "instance_type"      = "ecs.t5-lc1m2.small",
+      "vswitch_id"         = alicloud_vswitch.g.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
       "data_disk_size"     = 20,
@@ -104,8 +104,8 @@ module "alluxio" {
   }
   worker_instances = {
     "alluxio-worker-1" = {
-      "instance_type"      = "ecs.ic5.large",
-      "vswitch_id"         = module.vpc.this_vswitch_ids[0],
+      "instance_type"      = "ecs.t5-lc1m2.small",
+      "vswitch_id"         = alicloud_vswitch.e.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
       "data_disk_size"     = 20,
@@ -117,7 +117,7 @@ module "alluxio" {
 
 resource "local_file" "ssh_config" {
   content = templatefile("ssh_config.tpl", {
-    "ssh_priv_key_file" = "~/.ssh/aliyun-default"
+    "ssh_priv_key_file" = ".secrets/ssh_key"
     "jumpserver" = {
       "ip" = alicloud_eip.jumpserver_eip.ip_address
     },
