@@ -1,5 +1,43 @@
 provider "alicloud" {
-  version = "~> 1.93"
+  version = "~> 1.95.0"
+}
+
+locals {
+  common_tags = {
+    "project"     = var.project
+    "environment" = var.environment
+    "id"          = "${var.project}-${var.environment}"
+  }
+}
+
+module "basic_image" {
+  source = "./modules/alicloud_image"
+
+  src           = "${path.module}/image/basic"
+  setup         = "setup.sh"
+  image_name    = "basic"
+  source_image  = "debian_10_4_x64_20G_alibase_20200717.vhd"
+  instance_type = "ecs.n1.tiny"
+  tags = {
+    "project" = "potatobox"
+  }
+}
+
+module "alluxio_image" {
+  source = "./modules/alicloud_image"
+
+  src           = "${path.module}/image/alluxio"
+  setup         = "setup.sh"
+  image_name    = "alluxio"
+  source_image  = module.basic_image.image_id
+  instance_type = "ecs.n1.tiny"
+  tags = {
+    "project" = "potatobox"
+  }
+
+  envs_from_local_exec = {
+    "CR_TEMP_USER_PASSWORD" : "aliyun cr GetAuthorizationToken | jq -r .data.authorizationToken"
+  }
 }
 
 resource "alicloud_key_pair" "default" {
@@ -13,7 +51,7 @@ module "consul" {
   project     = var.project
   environment = var.environment
 
-  ecs_image_id = var.ecs_basic_image_id
+  ecs_image_id = module.basic_image.image_id
   key_name     = alicloud_key_pair.default.key_name
   tags         = local.common_tags
   instances = {
@@ -63,7 +101,7 @@ module "alluxio" {
   project     = var.project
   environment = var.environment
 
-  ecs_image_id = var.ecs_image_id
+  ecs_image_id = module.alluxio_image.image_id
   key_name     = alicloud_key_pair.default.key_name
   tags         = local.common_tags
 
@@ -116,7 +154,7 @@ module "alluxio" {
 }
 
 resource "local_file" "ssh_config" {
-  content = templatefile("ssh_config.tpl", {
+  content = templatefile("helpers/ssh_config.tpl", {
     "ssh_priv_key_file" = ".secrets/ssh_key"
     "jumpserver" = {
       "ip" = alicloud_eip.jumpserver_eip.ip_address

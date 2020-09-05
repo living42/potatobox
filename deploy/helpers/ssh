@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -eu
-BASE_DIR=$(realpath $(dirname $BASH_SOURCE[0]))
+BASE_DIR=$(realpath $(dirname $BASH_SOURCE[0])/..)
 
 exec ssh -F $BASE_DIR/.secrets/ssh_config $@

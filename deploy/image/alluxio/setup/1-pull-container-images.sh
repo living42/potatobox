@@ -7,7 +7,7 @@ echo "${CR_TEMP_USER_PASSWORD}" | docker login \
     --username cr_temp_user \
     --password-stdin \
     ${REGISTRY}
-# for i in alluxio hadoop hive presto spark; do
+
 for i in alluxio; do
     REMOTE_IMAGE=$REGISTRY/potatobox/$i
     docker pull -q $REMOTE_IMAGE
