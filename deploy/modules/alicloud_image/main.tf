@@ -13,7 +13,7 @@ locals {
     filesha256("${var.src}/${file}")
   ]))
   tags = merge(var.tags, {
-    "name" = var.image_name
+    "name"     = var.image_name
     "src_hash" = local.src_hash
   })
 }
