@@ -1,15 +1,17 @@
 #!/bin/sh
 set -xeu
 
-mkdir -p /root/scripts
-
 cp -r scripts/* /root/scripts/
 
-cd setup
 
-for script in $(ls); do 
-    echo start execute $script
-    chmod +x $script
-    ./$script
-    echo end execute $script
-done
+# Pull container images
+REGISTRY=${REGISTRY:-registry-vpc.cn-shanghai.aliyuncs.com}
+echo "${CR_TEMP_USER_PASSWORD}" | docker login \
+    --username cr_temp_user \
+    --password-stdin \
+    ${REGISTRY}
+
+REMOTE_IMAGE=$REGISTRY/potatobox/alluxio
+docker pull -q $REMOTE_IMAGE
+docker tag $REMOTE_IMAGE alluxio
+docker rmi $REMOTE_IMAGE
