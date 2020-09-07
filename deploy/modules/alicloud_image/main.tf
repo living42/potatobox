@@ -9,13 +9,14 @@ terraform {
 
 locals {
   src_hash = sha256(join("", [
-    for file in fileset(var.src, "**") :
+    for file in sort(fileset(var.src, "**")) :
     filesha256("${var.src}/${file}")
   ]))
   tags = merge(var.tags, {
     "name"     = var.image_name
-    "src_hash" = local.src_hash
   })
+  // alicloud limits image_name to 128 characters
+  image_name = substr("${var.image_name}_${local.src_hash}", 0, 128)
 }
 
 locals {
@@ -27,11 +28,11 @@ locals {
     "builders" = [
       {
         "type"                 = "alicloud-ecs",
-        "image_name"           = "${var.image_name}_{{user `build_time`}}",
+        "image_name"           = local.image_name,
         "source_image"         = var.source_image,
         "ssh_username"         = "root",
         "instance_type"        = var.instance_type,
-        "instance_name"        = "${var.image_name}_{{user `build_time`}}_builder",
+        "instance_name"        = substr("${local.image_name}_builder", 0, 128),
         "io_optimized"         = true,
         "internet_charge_type" = "PayByTraffic",
         "system_disk_mapping" = {
@@ -80,7 +81,7 @@ locals {
   cmd = <<-EOF
     set -eu
 
-    EXISTS_IMAGE="$(aliyun ecs DescribeImages ${local.image_tags_cli_flags})"
+    EXISTS_IMAGE="$(aliyun ecs DescribeImages --ImageName=${local.image_name} ${local.image_tags_cli_flags})"
     EXISTS_IMAGE_COUNT=$(echo "$EXISTS_IMAGE" | jq .TotalCount)
 
     if [ "$EXISTS_IMAGE_COUNT" -gt 0 ]; then
