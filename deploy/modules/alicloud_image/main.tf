@@ -90,13 +90,16 @@ locals {
 
     BUILD_TIME="$(date +%Y%m%d%H%M%S)"
 
+    CLEANUP=true
+    trap 'eval "$CLEANUP"' EXIT
+
     TEMPLATE_FILE=$(mktemp -t ${var.image_name}_$${BUILD_TIME}_template_XXXX.json)
-    trap "rm $TEMPLATE_FILE" EXIT
+    CLEANUP="$CLEANUP; rm $TEMPLATE_FILE"
     echo "$TEMPLATE" > $TEMPLATE_FILE
 
 
     LOG_FILE=$(mktemp -t ${var.image_name}_$${BUILD_TIME}_build_XXXX.log)
-    trap "rm $LOG_FILE" EXIT
+    CLEANUP="$CLEANUP; rm $LOG_FILE"
 
     ${templatefile("${path.module}/envs_from_local_exec.tpl", { "items" = var.envs_from_local_exec })}
 
