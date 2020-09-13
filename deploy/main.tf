@@ -83,7 +83,7 @@ module "alluxio" {
   }
 
   master_instances = {
-    "alluxio-master-1" = {
+    "alluxio-1" = {
       "instance_type"      = "ecs.c5.large",
       "vswitch_id"         = alicloud_vswitch.e.id,
       "security_groups"    = [alicloud_security_group.default.id],
@@ -92,7 +92,7 @@ module "alluxio" {
       "spot_strategy"      = "SpotAsPriceGo",
       "spot_price_limit"   = 0.12,
     },
-    "alluxio-master-2" = {
+    "alluxio-2" = {
       "instance_type"      = "ecs.c5.large",
       "vswitch_id"         = alicloud_vswitch.f.id,
       "security_groups"    = [alicloud_security_group.default.id],
@@ -101,7 +101,7 @@ module "alluxio" {
       "spot_strategy"      = "SpotAsPriceGo",
       "spot_price_limit"   = 0.12,
     },
-    "alluxio-master-3" = {
+    "alluxio-3" = {
       "instance_type"      = "ecs.c5.large",
       "vswitch_id"         = alicloud_vswitch.g.id,
       "security_groups"    = [alicloud_security_group.default.id],
@@ -112,7 +112,7 @@ module "alluxio" {
     }
   }
   worker_instances = {
-    "alluxio-worker-1" = {
+    "alluxio-4" = {
       "instance_type"      = "ecs.c5.large",
       "vswitch_id"         = alicloud_vswitch.e.id,
       "security_groups"    = [alicloud_security_group.default.id],
@@ -147,7 +147,7 @@ module "hive" {
   }
 
   metastore_instances = {
-    "hive-metastore-1" = {
+    "hive-1" = {
       "instance_type"      = "ecs.t5-lc1m1.small",
       "vswitch_id"         = alicloud_vswitch.e.id,
       "security_groups"    = [alicloud_security_group.default.id],
@@ -156,7 +156,7 @@ module "hive" {
       "spot_strategy"      = "SpotAsPriceGo",
       "spot_price_limit"   = 0.12,
     },
-    "hive-metastore-2" = {
+    "hive-2" = {
       "instance_type"      = "ecs.t5-lc1m1.small",
       "vswitch_id"         = alicloud_vswitch.e.id,
       "security_groups"    = [alicloud_security_group.default.id],
