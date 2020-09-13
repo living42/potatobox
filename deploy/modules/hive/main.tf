@@ -47,15 +47,6 @@ data "alicloud_vswitches" "vswitches" {
   ids = var.metastore_db.vswitch_ids
 }
 
-// find sutiable database zone for given vswitch_ids
-locals {
-  vsw_zones = keys({ for vsw in data.alicloud_vswitches.vswitches.vswitches : vsw.zone_id => true })
-  db_zone = [
-    for zone in data.alicloud_db_zones.zone_ids.zones : zone.id
-    if length(setintersection(zone.multi_zone_ids, local.vsw_zones)) == length(local.vsw_zones)
-  ][0]
-}
-
 resource "alicloud_db_instance" "hive" {
   instance_name            = "hive"
   engine                   = "MySQL"
@@ -63,7 +54,7 @@ resource "alicloud_db_instance" "hive" {
   instance_type            = var.metastore_db.instance_type
   instance_storage         = var.metastore_db.instance_storage
   db_instance_storage_type = var.metastore_db.instance_storage_type
-  zone_id                  = local.db_zone
+  zone_id                  = var.metastore_db.zone_id
   vswitch_id               = var.metastore_db.vswitch_ids[0]
   security_group_ids       = [alicloud_security_group.hive.id]
   tags                     = local.metastore_tags

@@ -143,6 +143,7 @@ module "hive" {
     instance_storage      = 10
     instance_storage_type = "local_ssd"
     vswitch_ids           = [alicloud_vswitch.e.id, alicloud_vswitch.f.id]
+    zone_id               = "cn-shanghai-MAZ4(e,f)"
   }
 
   metastore_instances = {

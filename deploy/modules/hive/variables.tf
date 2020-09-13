@@ -27,7 +27,8 @@ variable "metastore_db" {
     instance_type         = string,
     instance_storage      = number,
     instance_storage_type = string,
-    vswitch_ids           = list(string)
+    vswitch_ids           = list(string),
+    zone_id               = string
   })
 }
 
