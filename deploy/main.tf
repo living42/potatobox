@@ -1,5 +1,6 @@
 provider "alicloud" {
   version = "~> 1.95.0"
+  region  = "cn-shanghai"
 }
 
 locals {
@@ -26,7 +27,7 @@ module "consul" {
   tags         = local.common_tags
   instances = {
     "consul-1" = {
-      "instance_type"      = "ecs.s6-c1m1.small",
+      "instance_type"      = "ecs.t5-lc2m1.nano",
       "vswitch_id"         = alicloud_vswitch.e.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
@@ -35,7 +36,7 @@ module "consul" {
       "spot_price_limit"   = 0.12,
     },
     "consul-2" = {
-      "instance_type"      = "ecs.xn4.small",
+      "instance_type"      = "ecs.t5-lc2m1.nano",
       "vswitch_id"         = alicloud_vswitch.f.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
@@ -44,7 +45,7 @@ module "consul" {
       "spot_price_limit"   = 0.12,
     },
     "consul-3" = {
-      "instance_type"      = "ecs.s6-c1m1.small",
+      "instance_type"      = "ecs.t5-lc2m1.nano",
       "vswitch_id"         = alicloud_vswitch.g.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
@@ -83,7 +84,7 @@ module "alluxio" {
 
   master_instances = {
     "alluxio-master-1" = {
-      "instance_type"      = "ecs.t5-lc1m2.small",
+      "instance_type"      = "ecs.c5.large",
       "vswitch_id"         = alicloud_vswitch.e.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
@@ -92,7 +93,7 @@ module "alluxio" {
       "spot_price_limit"   = 0.12,
     },
     "alluxio-master-2" = {
-      "instance_type"      = "ecs.t5-lc1m2.small",
+      "instance_type"      = "ecs.c5.large",
       "vswitch_id"         = alicloud_vswitch.f.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
@@ -101,7 +102,7 @@ module "alluxio" {
       "spot_price_limit"   = 0.12,
     },
     "alluxio-master-3" = {
-      "instance_type"      = "ecs.t5-lc1m2.small",
+      "instance_type"      = "ecs.c5.large",
       "vswitch_id"         = alicloud_vswitch.g.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
@@ -112,7 +113,41 @@ module "alluxio" {
   }
   worker_instances = {
     "alluxio-worker-1" = {
-      "instance_type"      = "ecs.t5-lc1m2.small",
+      "instance_type"      = "ecs.c5.large",
+      "vswitch_id"         = alicloud_vswitch.e.id,
+      "security_groups"    = [alicloud_security_group.default.id],
+      "data_disk_category" = "cloud_efficiency",
+      "data_disk_size"     = 20,
+      "spot_strategy"      = "SpotAsPriceGo",
+      "spot_price_limit"   = 0.12,
+    }
+  }
+}
+
+module "hive" {
+  source = "./modules/hive"
+
+  project     = var.project
+  environment = var.environment
+
+  depends_on = [module.alluxio]
+
+  ecs_image_id            = module.hive_image.image_id
+  consul_server_addresses = module.consul.server_addresses
+  key_name                = alicloud_key_pair.default.key_name
+
+  tags = local.common_tags
+
+  metastore_db = {
+    instance_type         = "rds.mysql.t1.small"
+    instance_storage      = 10
+    instance_storage_type = "local_ssd"
+    vswitch_ids           = [alicloud_vswitch.e.id, alicloud_vswitch.f.id]
+  }
+
+  metastore_instances = {
+    "hive-metastore-1" = {
+      "instance_type"      = "ecs.c5.large",
       "vswitch_id"         = alicloud_vswitch.e.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",
@@ -132,7 +167,8 @@ resource "local_file" "ssh_config" {
     "internal_instances" = concat(
       module.consul.instances,
       module.alluxio.master_instances,
-      module.alluxio.worker_instances
+      module.alluxio.worker_instances,
+      module.hive.metastore_instances
     )
   })
   filename = ".secrets/ssh_config"

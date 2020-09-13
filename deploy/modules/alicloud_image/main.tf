@@ -13,7 +13,7 @@ locals {
     filesha256("${var.src}/${file}")
   ]))
   tags = merge(var.tags, {
-    "name"     = var.image_name
+    "name" = var.image_name
   })
   // alicloud limits image_name to 128 characters
   image_name = substr("${var.image_name}_${local.src_hash}", 0, 128)

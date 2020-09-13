@@ -2,7 +2,7 @@ ARG BASE_IMAGE
 
 FROM ${BASE_IMAGE}
 
-ARG HIVE_VERSION=3.1.2
+ARG HIVE_VERSION=2.3.7
 ARG APACHE_DIST_MIRROR=https://mirrors.aliyun.com/apache
 
 RUN set -xeu; \
@@ -18,7 +18,11 @@ RUN set -xeu; \
 ENV PATH=/opt/hive/bin:${PATH}
 
 # https://issues.apache.org/jira/browse/HIVE-22915
-RUN rm /opt/hive/lib/guava-19.0.jar && cp /opt/hadoop/share/hadoop/hdfs/lib/guava-27.0-jre.jar /opt/hive/lib/
+# RUN rm /opt/hive/lib/guava-19.0.jar && cp /opt/hadoop/share/hadoop/hdfs/lib/guava-27.0-jre.jar /opt/hive/lib/
+
+RUN set -xeu; \
+    cd /opt/hive/lib; \
+    wget https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.21/mysql-connector-java-8.0.21.jar;
 
 # redirect logs to /var/log/hive
 RUN set -xeu; \
