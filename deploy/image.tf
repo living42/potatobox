@@ -45,3 +45,21 @@ module "hive_image" {
     "CR_TEMP_USER_PASSWORD" : "aliyun cr GetAuthorizationToken | jq -r .data.authorizationToken"
   }
 }
+
+
+module "presto_image" {
+  source = "./modules/alicloud_image"
+
+  src           = "${path.module}/image/presto"
+  setup         = "setup.sh"
+  image_name    = "presto"
+  source_image  = module.alluxio_image.image_id
+  instance_type = "ecs.n1.tiny"
+  tags = {
+    "project" = var.project
+  }
+
+  envs_from_local_exec = {
+    "CR_TEMP_USER_PASSWORD" : "aliyun cr GetAuthorizationToken | jq -r .data.authorizationToken"
+  }
+}

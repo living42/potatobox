@@ -168,6 +168,66 @@ module "hive" {
   }
 }
 
+module "presto" {
+  source = "./modules/presto"
+
+  project     = var.project
+  environment = var.environment
+
+  depends_on = [module.alluxio, module.hive]
+
+  ecs_image_id            = module.presto_image.image_id
+  consul_server_addresses = module.consul.server_addresses
+  key_name                = alicloud_key_pair.default.key_name
+
+  tags = local.common_tags
+
+  oss_ufs = {
+    "bucket_name" = alicloud_oss_bucket.alluxio_ufs.id,
+  }
+
+  coordinator = "presto-1"
+
+  instances = {
+    "presto-1" = {
+      "instance_type"      = "ecs.c5.large",
+      "vswitch_id"         = alicloud_vswitch.e.id,
+      "security_groups"    = [alicloud_security_group.default.id],
+      "data_disk_category" = "cloud_efficiency",
+      "data_disk_size"     = 20,
+      "spot_strategy"      = "SpotAsPriceGo",
+      "spot_price_limit"   = 0.12,
+    },
+    "presto-2" = {
+      "instance_type"      = "ecs.c5.large",
+      "vswitch_id"         = alicloud_vswitch.e.id,
+      "security_groups"    = [alicloud_security_group.default.id],
+      "data_disk_category" = "cloud_efficiency",
+      "data_disk_size"     = 20,
+      "spot_strategy"      = "SpotAsPriceGo",
+      "spot_price_limit"   = 0.12,
+    },
+    "presto-3" = {
+      "instance_type"      = "ecs.c5.large",
+      "vswitch_id"         = alicloud_vswitch.e.id,
+      "security_groups"    = [alicloud_security_group.default.id],
+      "data_disk_category" = "cloud_efficiency",
+      "data_disk_size"     = 20,
+      "spot_strategy"      = "SpotAsPriceGo",
+      "spot_price_limit"   = 0.12,
+    },
+    "presto-4" = {
+      "instance_type"      = "ecs.c5.large",
+      "vswitch_id"         = alicloud_vswitch.e.id,
+      "security_groups"    = [alicloud_security_group.default.id],
+      "data_disk_category" = "cloud_efficiency",
+      "data_disk_size"     = 20,
+      "spot_strategy"      = "SpotAsPriceGo",
+      "spot_price_limit"   = 0.12,
+    }
+  }
+}
+
 resource "local_file" "ssh_config" {
   content = templatefile("helpers/ssh_config.tpl", {
     "ssh_priv_key_file" = ".secrets/ssh_key"
@@ -178,7 +238,8 @@ resource "local_file" "ssh_config" {
       module.consul.instances,
       module.alluxio.master_instances,
       module.alluxio.worker_instances,
-      module.hive.metastore_instances
+      module.hive.metastore_instances,
+      module.presto.instances
     )
   })
   filename = ".secrets/ssh_config"
