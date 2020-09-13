@@ -64,7 +64,7 @@ resource "alicloud_db_instance" "hive" {
   instance_storage         = var.metastore_db.instance_storage
   db_instance_storage_type = var.metastore_db.instance_storage_type
   zone_id                  = local.db_zone
-  vswitch_id               = join(",", var.metastore_db.vswitch_ids)
+  vswitch_id               = var.metastore_db.vswitch_ids[0]
   security_group_ids       = [alicloud_security_group.hive.id]
   tags                     = local.metastore_tags
 }

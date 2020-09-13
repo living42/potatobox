@@ -147,7 +147,16 @@ module "hive" {
 
   metastore_instances = {
     "hive-metastore-1" = {
-      "instance_type"      = "ecs.c5.large",
+      "instance_type"      = "ecs.t5-lc1m1.small",
+      "vswitch_id"         = alicloud_vswitch.e.id,
+      "security_groups"    = [alicloud_security_group.default.id],
+      "data_disk_category" = "cloud_efficiency",
+      "data_disk_size"     = 20,
+      "spot_strategy"      = "SpotAsPriceGo",
+      "spot_price_limit"   = 0.12,
+    },
+    "hive-metastore-2" = {
+      "instance_type"      = "ecs.t5-lc1m1.small",
       "vswitch_id"         = alicloud_vswitch.e.id,
       "security_groups"    = [alicloud_security_group.default.id],
       "data_disk_category" = "cloud_efficiency",

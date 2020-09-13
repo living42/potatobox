@@ -4,6 +4,28 @@ set -xeu
 DB_INSTANCE_ID=$1
 DB_NAME=$2
 
+SERVICE_DEF=/etc/consul.d/hive.json
+
+cat <<EOF > $SERVICE_DEF
+{
+  "service": {
+    "name": "hive",
+    "tags": ["metastore"],
+    "checks": [
+      {
+        "name": "metastore thrift port",
+        "tcp": "localhost:9083",
+        "interval": "10s",
+        "timeout": "1s"
+      }
+    ]
+  }
+}
+EOF
+chown consul:consul $SERVICE_DEF
+chmod 600 $SERVICE_DEF
+consul reload
+
 SERVICE_DIR=/root/services/hive
 mkdir -p $SERVICE_DIR
 cd $SERVICE_DIR
@@ -12,7 +34,7 @@ ALLUXIO_SERVICE_DIR=$(dirname $SERVICE_DIR)/alluxio
 
 export HOME=/root
 
-DB_USER="metastore_$(hostname)"
+DB_USER=$(curl -sS 100.100.100.200/2016-01-01/meta-data/instance-id | sed 's/i-/ecs_/g')
 DB_PASSWORD="$(head -c 15 /dev/urandom | base32)"
 
 # create account and grant read write access
@@ -36,7 +58,7 @@ cat <<EOF > hive-site-private.xml
 <configuration>
   <property>
     <name>hive.metastore.uris</name>
-    <value>thrift://$(hostname):9083</value>
+    <value>thrift://metastore.hive.service.consul:9083</value>
   </property>
   <property>
     <name>hive.metastore.warehouse.dir</name>
@@ -65,9 +87,10 @@ cat <<EOF > hive-site-private.xml
 </configuration>
 EOF
 
+HADOOP_SERVICE_DIR=$(dirname $SERVICE_DIR)/hadoop
+mkdir -p $HADOOP_SERVICE_DIR
 
-# TODO move core-site.xml into hadoop service's dir
-cat <<EOF > core-site.xml
+cat <<EOF > $HADOOP_SERVICE_DIR/core-site.xml
 <configuration>
   <property>
     <name>fs.alluxio.impl</name>
@@ -92,12 +115,19 @@ services:
       - /var/log/hive:/var/log/hive
       - /var/log/alluxio:/var/log/alluxio
       - ./hive-site-private.xml:/opt/hive/conf/hive-site.xml:ro
-      - ./core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml:ro
+      - ${HADOOP_SERVICE_DIR}/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml:ro
       - ${ALLUXIO_SERVICE_DIR}/alluxio-site.properties:/opt/alluxio/conf/alluxio-site.properties:ro
     command: hive --service metastore
     restart: unless-stopped
 EOF
 
-docker-compose --no-ansi run --rm hive_metastore bash -c "schematool -dbType mysql -upgradeSchema || schematool -dbType mysql -initSchema"
+# schema upgrade using consul lock, it will ensure this operation run in serial across cluster
+cat <<EOF | consul lock -shell -pass-stdin -child-exit-code hive/db-migrate bash -s
+set -xe
+RUN="docker-compose --no-ansi run --rm hive_metastore"
+\$RUN schematool -dbType mysql -upgradeSchema || {
+  \$RUN schematool -dbType mysql -initSchema
+}
+EOF
 
 docker-compose up -d hive_metastore
