@@ -50,9 +50,3 @@ EOF
 
 consul-template --once \
     --template 'alluxio-site.properties.tpl:alluxio-site.properties'
-
-
-# Test alluxio functionality
-docker run --rm --network host \
-    -v $SERVICE_DIR/alluxio-site.properties:/opt/alluxio/conf/alluxio-site.properties:ro \
-    alluxio alluxio runTests --directory /.alluxio_client_tests/$(hostname) --operation BASIC
