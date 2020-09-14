@@ -11,7 +11,7 @@ FROM ${BASE_IMAGE}
 
 ARG APACHE_DIST_MIRROR=https://mirrors.aliyun.com/apache
 
-ARG SPARK2_VERSION=2.4.6
+ARG SPARK2_VERSION=2.4.7
 
 RUN set -xeu; \
     mkdir /tmp/dl; \
@@ -23,7 +23,7 @@ RUN set -xeu; \
     mv spark-${SPARK2_VERSION}-bin-without-hadoop /opt/spark; \
     rm -rf /tmp/dl
 
-ARG SPARK3_VERSION=3.0.0
+ARG SPARK3_VERSION=3.0.1
 
 RUN set -xeu; \
     mkdir /tmp/dl; \
