@@ -9,15 +9,14 @@ RUN set -xeu;\
 
 FROM ${BASE_IMAGE}
 
-ARG APACHE_DIST_MIRROR=https://mirrors.aliyun.com/apache
-
 ARG SPARK2_VERSION=2.4.7
 
 RUN set -xeu; \
     mkdir /tmp/dl; \
     cd /tmp/dl; \
     wget https://archive.apache.org/dist/spark/spark-${SPARK2_VERSION}/spark-${SPARK2_VERSION}-bin-without-hadoop.tgz.sha512; \
-    wget --progress=dot:giga ${APACHE_DIST_MIRROR}/spark/spark-${SPARK2_VERSION}/spark-${SPARK2_VERSION}-bin-without-hadoop.tgz; \
+    wget --progress=dot:giga -O spark-${SPARK2_VERSION}-bin-without-hadoop.tgz \
+        "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=spark/spark-${SPARK2_VERSION}/spark-${SPARK2_VERSION}-bin-without-hadoop.tgz"; \
     gpg --print-md SHA512 spark-${SPARK2_VERSION}-bin-without-hadoop.tgz | diff - spark-${SPARK2_VERSION}-bin-without-hadoop.tgz.sha512; \
     tar -xzf spark-${SPARK2_VERSION}-bin-without-hadoop.tgz; \
     mv spark-${SPARK2_VERSION}-bin-without-hadoop /opt/spark; \
@@ -29,7 +28,8 @@ RUN set -xeu; \
     mkdir /tmp/dl; \
     cd /tmp/dl; \
     wget https://archive.apache.org/dist/spark/spark-${SPARK3_VERSION}/spark-${SPARK3_VERSION}-bin-without-hadoop.tgz.sha512; \
-    wget --progress=dot:giga ${APACHE_DIST_MIRROR}/spark/spark-${SPARK3_VERSION}/spark-${SPARK3_VERSION}-bin-without-hadoop.tgz; \
+    wget --progress=dot:giga -O spark-${SPARK3_VERSION}-bin-without-hadoop.tgz \
+        "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=spark/spark-${SPARK3_VERSION}/spark-${SPARK3_VERSION}-bin-without-hadoop.tgz"; \
     gpg --print-md SHA512 spark-${SPARK3_VERSION}-bin-without-hadoop.tgz | diff - spark-${SPARK3_VERSION}-bin-without-hadoop.tgz.sha512; \
     tar -xzf spark-${SPARK3_VERSION}-bin-without-hadoop.tgz; \
     mv spark-${SPARK3_VERSION}-bin-without-hadoop /opt/spark3; \

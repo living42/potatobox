@@ -3,13 +3,13 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 ARG HIVE_VERSION=2.3.7
-ARG APACHE_DIST_MIRROR=https://mirrors.aliyun.com/apache
 
 RUN set -xeu; \
     mkdir /tmp/dl; \
     cd /tmp/dl; \
     wget https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz.sha256; \
-    wget --progress=dot:giga ${APACHE_DIST_MIRROR}/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz; \
+    wget --progress=dot:giga -O apache-hive-${HIVE_VERSION}-bin.tar.gz \
+        "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz"; \
     sha256sum -c apache-hive-${HIVE_VERSION}-bin.tar.gz.sha256; \
     tar -xzf apache-hive-${HIVE_VERSION}-bin.tar.gz; \
     mv apache-hive-${HIVE_VERSION}-bin /opt/hive; \

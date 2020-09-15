@@ -2,7 +2,6 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 ARG HADOOP_VERSION=3.2.1
-ARG APACHE_DIST_MIRROR=https://mirrors.aliyun.com/apache
 
 RUN set -xeu; \
     apt-get update; \
@@ -13,7 +12,8 @@ RUN set -xeu; \
     cd /tmp/dl; \
     wget https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.sha512; \
     sed -i 's#/build/source/target/artifacts/##g' hadoop-${HADOOP_VERSION}.tar.gz.sha512; \
-    wget --progress=dot:giga ${APACHE_DIST_MIRROR}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz; \
+    wget --progress=dot:giga -O hadoop-${HADOOP_VERSION}.tar.gz \
+        "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz"; \
     sha512sum -c hadoop-${HADOOP_VERSION}.tar.gz.sha512; \
     tar -xzf hadoop-${HADOOP_VERSION}.tar.gz; \
     mv hadoop-${HADOOP_VERSION} /opt/hadoop; \
