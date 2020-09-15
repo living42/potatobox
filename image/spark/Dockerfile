@@ -35,18 +35,6 @@ RUN set -xeu; \
     mv spark-${SPARK3_VERSION}-bin-without-hadoop /opt/spark3; \
     rm -rf /tmp/dl
 
-# THIS IS TEMPORARY SOLUTION
-# Install master branch of Apache Hudi, for alluxio filesystem support
-# we use jitpack.io to get the artifact from specific commit
-ARG HUDI_COMMIT_ID=0cb24e4a2defd8e639437b6cd145a26f038ef1af
-RUN set -xeu; \
-    echo ping jitpack to build specific version by commit id; \
-    wget -O /dev/null https://jitpack.io/com/github/apache/hudi/hudi-spark-bundle_2.11/${HUDI_COMMIT_ID}/hudi-spark-bundle_2.11-${HUDI_COMMIT_ID}.pom; \
-    echo downloading hudi-spark-bundle_2.11; \
-    mkdir -p /opt/hudi/hudi-spark-bundle_2.11; \
-    wget --progress=dot:mega https://jitpack.io/com/github/apache/hudi/hudi-spark-bundle_2.11/${HUDI_COMMIT_ID}/hudi-spark-bundle_2.11-${HUDI_COMMIT_ID}.jar \
-        -O /opt/hudi/hudi-spark-bundle_2.11/hudi-spark-bundle_2.11-${HUDI_COMMIT_ID}.jar
-
 # set spark spark2 as default
 ENV PATH=/opt/spark/bin:${PATH}
 
