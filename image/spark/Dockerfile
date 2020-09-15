@@ -44,3 +44,7 @@ RUN set -xeu; \
     \
     echo "export SPARK_DIST_CLASSPATH=\$(hadoop classpath)" >> /opt/spark3/conf/spark-env.sh; \
     echo "export LD_LIBRARY_PATH=\$HADOOP_HOME/lib/native/:\$LD_LIBRARY_PATH" >> /opt/spark3/conf/spark-env.sh
+
+COPY --from=alluxio /tmp/alluxio-client/*.jar /opt/spark/jars/
+
+COPY --from=alluxio /tmp/alluxio-client/*.jar /opt/spark3/jars/
