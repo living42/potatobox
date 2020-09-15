@@ -1,6 +1,13 @@
 variable "project" {
-  type    = string
-  default = "potatobox"
+  type = string
+}
+
+variable "environment" {
+  type = string
+}
+
+variable "alicloud_cr_namespace" {
+  type = string
 }
 
 module "alluxio" {
@@ -8,6 +15,12 @@ module "alluxio" {
 
   context = "${path.module}/alluxio"
   tag     = "${var.project}/alluxio:latest"
+
+  publish = {
+    "namespace" = var.alicloud_cr_namespace
+    "repo"      = "alluxio"
+    "tag"       = "${var.project}-${var.environment}"
+  }
 }
 
 module "hadoop" {
@@ -17,6 +30,12 @@ module "hadoop" {
   tag     = "${var.project}/hadoop:latest"
   build_args = {
     "BASE_IMAGE" = module.alluxio.iid
+  }
+
+  publish = {
+    "namespace" = var.alicloud_cr_namespace
+    "repo"      = "hadoop"
+    "tag"       = "${var.project}-${var.environment}"
   }
 }
 
@@ -28,6 +47,12 @@ module "hive" {
   build_args = {
     "BASE_IMAGE" = module.hadoop.iid
   }
+
+  publish = {
+    "namespace" = var.alicloud_cr_namespace
+    "repo"      = "hive"
+    "tag"       = "${var.project}-${var.environment}"
+  }
 }
 
 module "presto" {
@@ -37,6 +62,12 @@ module "presto" {
   tag     = "${var.project}/presto:latest"
   build_args = {
     "ALLUXIO_IMAGE" = module.alluxio.iid
+  }
+
+  publish = {
+    "namespace" = var.alicloud_cr_namespace
+    "repo"      = "presto"
+    "tag"       = "${var.project}-${var.environment}"
   }
 }
 
@@ -48,5 +79,11 @@ module "spark" {
   build_args = {
     "BASE_IMAGE"    = module.hive.iid
     "ALLUXIO_IMAGE" = module.alluxio.iid
+  }
+
+  publish = {
+    "namespace" = var.alicloud_cr_namespace
+    "repo"      = "spark"
+    "tag"       = "${var.project}-${var.environment}"
   }
 }

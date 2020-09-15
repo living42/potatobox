@@ -13,7 +13,7 @@ locals {
 
 resource "alicloud_key_pair" "default" {
   key_name   = "${var.project}-${var.environment}"
-  public_key = file(".secrets/ssh_key.pub")
+  public_key = file("${path.module}/.secrets/ssh_key.pub")
 }
 
 module "consul" {
@@ -229,8 +229,8 @@ module "presto" {
 }
 
 resource "local_file" "ssh_config" {
-  content = templatefile("helpers/ssh_config.tpl", {
-    "ssh_priv_key_file" = ".secrets/ssh_key"
+  content = templatefile("${path.module}/helpers/ssh_config.tpl", {
+    "ssh_priv_key_file" = "${path.module}/.secrets/ssh_key"
     "jumpserver" = {
       "ip" = alicloud_eip.jumpserver_eip.ip_address
     },
@@ -242,5 +242,5 @@ resource "local_file" "ssh_config" {
       module.presto.instances
     )
   })
-  filename = ".secrets/ssh_config"
+  filename = "${path.module}/.secrets/ssh_config"
 }

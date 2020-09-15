@@ -1,9 +1,7 @@
 variable "project" {
-  type    = string
-  default = "potatobox"
+  type = string
 }
 
 variable "environment" {
-  type    = string
-  default = "testing"
+  type = string
 }
