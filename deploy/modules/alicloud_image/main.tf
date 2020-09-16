@@ -8,15 +8,18 @@ terraform {
 }
 
 locals {
-  src_hash = sha256(join("", [
-    for file in sort(fileset(var.src, "**")) :
-    filesha256("${var.src}/${file}")
-  ]))
+  hashes = concat(
+    [for file in sort(fileset(var.src, "**")) : filesha256("${var.src}/${file}")],
+    [for kv in sort([for k, v in var.envs : "${k}=${v}"]) : sha256(kv)],
+    [for kv in sort([for k, v in var.envs_from_local_exec : "${k}=${v}"]) : sha256(kv)]
+  )
+
+  hash = sha256(join("", local.hashes))
   tags = merge(var.tags, {
     "name" = var.image_name
   })
   // alicloud limits image_name to 128 characters
-  image_name = substr("${var.image_name}_${local.src_hash}", 0, 128)
+  image_name = substr("${var.image_name}_${local.hash}", 0, 128)
 }
 
 locals {
@@ -63,9 +66,9 @@ locals {
           "/tmp/build/${var.setup}",
           "rm -rf /tmp/build"
         ]
-        "environment_vars" = [
+        "environment_vars" = concat([
           "ENVS_FROM_LOCAL_EXEC={{user `ENVS_FROM_LOCAL_EXEC`}}"
-        ]
+        ], [for k, v in var.envs : "${k}=${v}"])
       }
     ]
   })

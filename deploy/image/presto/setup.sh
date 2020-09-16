@@ -5,13 +5,11 @@ cp -r scripts/* /root/scripts/
 
 
 # Pull container images
-REGISTRY=${REGISTRY:-registry-vpc.cn-shanghai.aliyuncs.com}
 echo "${CR_TEMP_USER_PASSWORD}" | docker login \
     --username cr_temp_user \
     --password-stdin \
-    ${REGISTRY}
+    ${PRESTO_IMAGE}
 
-REMOTE_IMAGE=$REGISTRY/potatobox/presto
-docker pull -q $REMOTE_IMAGE
-docker tag $REMOTE_IMAGE presto
-docker rmi $REMOTE_IMAGE
+docker pull -q ${PRESTO_IMAGE}
+docker tag ${PRESTO_IMAGE} presto
+docker rmi ${PRESTO_IMAGE}

@@ -29,3 +29,8 @@ variable "envs_from_local_exec" {
   type    = map(string)
   default = {}
 }
+
+variable "envs" {
+  type    = map(string)
+  default = {}
+}

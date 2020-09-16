@@ -29,4 +29,8 @@ module "deploy" {
 
   project     = var.project
   environment = var.environment
+
+  alluxio_docker_image = module.image.alluxio_image
+  hive_docker_image    = module.image.hive_image
+  presto_docker_image  = module.image.presto_image
 }

@@ -18,7 +18,7 @@ RUN set -xeu; \
 ENV PATH=/opt/hive/bin:${PATH}
 
 # https://issues.apache.org/jira/browse/HIVE-22915
-# RUN rm /opt/hive/lib/guava-19.0.jar && cp /opt/hadoop/share/hadoop/hdfs/lib/guava-27.0-jre.jar /opt/hive/lib/
+RUN rm /opt/hive/lib/guava-*.jar && cp /opt/hadoop/share/hadoop/hdfs/lib/guava-27.0-jre.jar /opt/hive/lib/
 
 RUN set -xeu; \
     cd /opt/hive/lib; \

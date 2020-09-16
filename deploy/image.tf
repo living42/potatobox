@@ -23,6 +23,9 @@ module "alluxio_image" {
     "project" = var.project
   }
 
+  envs = {
+    "ALLUXIO_IMAGE" = var.alluxio_docker_image.vpc
+  }
   envs_from_local_exec = {
     "CR_TEMP_USER_PASSWORD" : "aliyun cr GetAuthorizationToken | jq -r .data.authorizationToken"
   }
@@ -41,6 +44,9 @@ module "hive_image" {
     "project" = var.project
   }
 
+  envs = {
+    "HIVE_IMAGE" = var.hive_docker_image.vpc
+  }
   envs_from_local_exec = {
     "CR_TEMP_USER_PASSWORD" : "aliyun cr GetAuthorizationToken | jq -r .data.authorizationToken"
   }
@@ -59,6 +65,9 @@ module "presto_image" {
     "project" = var.project
   }
 
+  envs = {
+    "PRESTO_IMAGE" = var.presto_docker_image.vpc
+  }
   envs_from_local_exec = {
     "CR_TEMP_USER_PASSWORD" : "aliyun cr GetAuthorizationToken | jq -r .data.authorizationToken"
   }

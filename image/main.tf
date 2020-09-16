@@ -23,6 +23,11 @@ module "alluxio" {
   }
 }
 
+output "alluxio_image" {
+  value = module.alluxio.image
+}
+
+
 module "hadoop" {
   source = "./modules/docker_image"
 
@@ -38,6 +43,11 @@ module "hadoop" {
     "tag"       = "${var.project}-${var.environment}"
   }
 }
+
+output "hadoop_image" {
+  value = module.hadoop.image
+}
+
 
 module "hive" {
   source = "./modules/docker_image"
@@ -55,6 +65,11 @@ module "hive" {
   }
 }
 
+output "hive_image" {
+  value = module.hive.image
+}
+
+
 module "presto" {
   source = "./modules/docker_image"
 
@@ -71,6 +86,11 @@ module "presto" {
   }
 }
 
+output "presto_image" {
+  value = module.presto.image
+}
+
+
 module "spark" {
   source = "./modules/docker_image"
 
@@ -86,4 +106,8 @@ module "spark" {
     "repo"      = "spark"
     "tag"       = "${var.project}-${var.environment}"
   }
+}
+
+output "spark_image" {
+  value = module.spark.image
 }

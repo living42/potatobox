@@ -66,6 +66,7 @@ resource "shell_script" "publish" {
       TIME="$(date +%Y%m%d%H%M%S)"
       REGISTRY="${alicloud_cr_repo.repo.domain_list.public}"
       IID="${shell_script.image.output["iid"]}"
+      REPO="${alicloud_cr_repo.repo.id}"
 
       CLEANUP=true
       trap 'eval "$CLEANUP"' EXIT
@@ -78,7 +79,7 @@ resource "shell_script" "publish" {
         | docker login -u cr_temp_user $REGISTRY --password-stdin > /dev/null
       CLEANUP="$CLEANUP; docker logout $REGISTRY > /dev/null || true"
 
-      URI="$REGISTRY/${alicloud_cr_repo.repo.id}"
+      URI="$REGISTRY/$REPO"
 
       docker tag $IID $URI >> $LOG_FILE || {
         cat $LOG_FILE >&2
@@ -92,7 +93,7 @@ resource "shell_script" "publish" {
       }
 
       DIGEST="$(cat $LOG_FILE | grep 'digest: sha256' | awk '{print $3}')"
-      echo "{\"digest\":\"$DIGEST\"}"
+      echo "{\"repo\":\"$REPO@$DIGEST\"}"
     EOF
     delete = "true"
   }
