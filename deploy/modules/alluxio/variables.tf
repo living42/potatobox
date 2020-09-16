@@ -20,7 +20,8 @@ variable "consul_server_addresses" {
 
 variable "oss_ufs" {
   type = object({
-    bucket_name = string
+    bucket_name       = string
+    intranet_endpoint = string
   })
 }
 

@@ -79,7 +79,8 @@ module "alluxio" {
   consul_server_addresses = module.consul.server_addresses
 
   oss_ufs = {
-    "bucket_name" = alicloud_oss_bucket.alluxio_ufs.id,
+    "bucket_name"       = alicloud_oss_bucket.alluxio_ufs.id
+    "intranet_endpoint" = alicloud_oss_bucket.alluxio_ufs.intranet_endpoint
   }
 
   master_instances = {
@@ -183,7 +184,8 @@ module "presto" {
   tags = local.common_tags
 
   oss_ufs = {
-    "bucket_name" = alicloud_oss_bucket.alluxio_ufs.id,
+    "bucket_name"       = alicloud_oss_bucket.alluxio_ufs.id
+    "intranet_endpoint" = alicloud_oss_bucket.alluxio_ufs.intranet_endpoint
   }
 
   coordinator = "presto-1"

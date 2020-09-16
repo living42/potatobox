@@ -3,14 +3,6 @@ locals {
   worker_tags      = merge(var.tags, { "presto" = "worker" })
 }
 
-data "alicloud_oss_buckets" "oss_ufs" {
-  name_regex = var.oss_ufs.bucket_name
-}
-
-locals {
-  oss_ufs = data.alicloud_oss_buckets.oss_ufs.buckets[0]
-}
-
 resource "alicloud_ram_user" "alluxio" {
   name     = "${var.project}-${var.environment}-presto-alluxio"
   comments = "Represents Alluxio Service behalf in project ${var.project}(${var.environment})"
@@ -38,8 +30,8 @@ resource "alicloud_ram_policy" "alluxio" {
         ],
         "Effect": "Allow",
         "Resource": [
-          "acs:oss:*:*:${local.oss_ufs.name}",
-          "acs:oss:*:*:${local.oss_ufs.name}/*"
+          "acs:oss:*:*:${var.oss_ufs.bucket_name}",
+          "acs:oss:*:*:${var.oss_ufs.bucket_name}/*"
         ]
       }
     ],
@@ -183,8 +175,8 @@ resource "alicloud_instance" "worker" {
       1 \
       $ACCESS_KEY_ID \
       $ACCESS_KEY_SECRET \
-      ${local.oss_ufs.intranet_endpoint} \
-      ${local.oss_ufs.name}
+      ${var.oss_ufs.intranet_endpoint} \
+      ${var.oss_ufs.bucket_name}
 
     bash $SCRIPTS/setup-presto.sh worker $ALLUXIO_DATA_DIR
   EOT
