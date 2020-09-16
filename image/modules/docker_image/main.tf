@@ -8,6 +8,10 @@ terraform {
 }
 
 locals {
+  log_dir = "${abspath(path.root)}/.logs"
+}
+
+locals {
   src_hash = sha256(join("", [
     for file in sort(fileset(var.context, "**")) :
     filesha256("${var.context}/${file}")
@@ -18,13 +22,13 @@ locals {
     set -eu
     cd ${var.context}
 
-    BUILD_TIME="$(date +%Y%m%d%H%M%S)"
+    TIME="$(date +%Y%m%d%H%M%S)"
 
     CLEANUP=true
     trap 'eval "$CLEANUP"' EXIT
 
-    LOG_FILE=$(mktemp -t ${local.slug}_$${BUILD_TIME}_build_XXXX.log)
-    CLEANUP="$CLEANUP; rm $LOG_FILE"
+    LOG_FILE=${local.log_dir}/docker_image/${local.slug}_build_$${TIME}.log
+    mkdir -p $(dirname $LOG_FILE)
 
     docker build -t ${local.slug} ${local.build_args_cli} . > $LOG_FILE || {
       cat $LOG_FILE >&2
@@ -43,7 +47,7 @@ resource "shell_script" "image" {
 
   lifecycle_commands {
     create = local.create
-    delete = "docker rmi ${local.slug}"
+    delete = "true"
   }
 }
 
@@ -71,8 +75,8 @@ resource "shell_script" "publish" {
       CLEANUP=true
       trap 'eval "$CLEANUP"' EXIT
 
-      LOG_FILE=$(mktemp -t ${local.slug}_$${TIME}_push_XXXX.log)
-      CLEANUP="$CLEANUP; rm $LOG_FILE"
+      LOG_FILE=${local.log_dir}/docker_image/${local.slug}_push_$${TIME}.log
+      mkdir -p $(dirname $LOG_FILE)
 
       aliyun cr GetAuthorizationToken \
         | jq -r .data.authorizationToken \

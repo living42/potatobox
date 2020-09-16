@@ -8,6 +8,10 @@ terraform {
 }
 
 locals {
+  log_dir = "${abspath(path.root)}/.logs"
+}
+
+locals {
   hashes = concat(
     [for file in sort(fileset(var.src, "**")) : filesha256("${var.src}/${file}")],
     [for kv in sort([for k, v in var.envs : "${k}=${v}"]) : sha256(kv)],
@@ -102,8 +106,8 @@ locals {
     echo "$TEMPLATE" > $TEMPLATE_FILE
 
 
-    LOG_FILE=$(mktemp -t ${var.image_name}_$${BUILD_TIME}_build_XXXX.log)
-    CLEANUP="$CLEANUP; rm $LOG_FILE"
+    LOG_FILE="${local.log_dir}/alicloud_image/${var.image_name}_build_$${BUILD_TIME}.log"
+    mkdir -p $(dirname $LOG_FILE)
 
     ${templatefile("${path.module}/envs_from_local_exec.tpl", { "items" = var.envs_from_local_exec })}
 
