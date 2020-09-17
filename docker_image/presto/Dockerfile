@@ -8,7 +8,7 @@ RUN set -xeu;\
 
 FROM openjdk:11.0.8
 
-ARG PRESTO_VERSION=339
+ARG PRESTO_VERSION=341
 
 RUN set -xeu; \
     mkdir /tmp/dl; \
