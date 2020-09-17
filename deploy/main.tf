@@ -137,6 +137,8 @@ module "hive" {
   consul_server_addresses = module.consul.server_addresses
   key_name                = alicloud_key_pair.default.key_name
 
+  vpc_id = alicloud_vpc.main.id
+
   tags = local.common_tags
 
   metastore_db = {

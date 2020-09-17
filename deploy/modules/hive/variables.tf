@@ -22,6 +22,10 @@ variable "tags" {
   type = map(string)
 }
 
+variable "vpc_id" {
+  type = string
+}
+
 variable "metastore_db" {
   type = object({
     instance_type         = string,

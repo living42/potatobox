@@ -39,14 +39,6 @@ resource "alicloud_instance" "metastore" {
   depends_on = [alicloud_db_instance.hive]
 }
 
-data "alicloud_db_zones" "zone_ids" {
-  multi = true
-}
-
-data "alicloud_vswitches" "vswitches" {
-  ids = var.metastore_db.vswitch_ids
-}
-
 resource "alicloud_db_instance" "hive" {
   instance_name            = "hive"
   engine                   = "MySQL"
@@ -70,7 +62,7 @@ resource "alicloud_security_group" "hive" {
   name        = "${var.project}-${var.environment}-hive"
   description = "resources in this group will have hive database access"
   tags        = local.metastore_tags
-  vpc_id      = data.alicloud_vswitches.vswitches.vswitches[0].vpc_id
+  vpc_id      = var.vpc_id
 }
 
 resource "alicloud_ram_role" "hive" {
