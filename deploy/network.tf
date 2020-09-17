@@ -73,7 +73,7 @@ resource "alicloud_eip_association" "jumpserver_eip" {
 
 resource "alicloud_instance" "jumpserver" {
   instance_name        = "jumpserver"
-  image_id             = module.basic_image.image_id
+  image_id             = var.ecs_images.basic
   instance_type        = "ecs.s6-c1m1.small"
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 20

@@ -16,12 +16,22 @@ module "infra" {
   environment = var.environment
 }
 
-module "image" {
-  source = "./image"
+module "docker_image" {
+  source = "./docker_image"
 
-  project               = var.project
-  environment           = var.environment
+  project     = var.project
+  environment = var.environment
+
   alicloud_cr_namespace = module.infra.alicloud_cr_namespace
+}
+
+module "ecs_image" {
+  source = "./ecs_image"
+
+  project     = var.project
+  environment = var.environment
+
+  docker_images = module.docker_image.images
 }
 
 module "deploy" {
@@ -30,7 +40,5 @@ module "deploy" {
   project     = var.project
   environment = var.environment
 
-  alluxio_docker_image = module.image.alluxio_image
-  hive_docker_image    = module.image.hive_image
-  presto_docker_image  = module.image.presto_image
+  ecs_images = module.ecs_image.images
 }

@@ -22,7 +22,7 @@ module "consul" {
   project     = var.project
   environment = var.environment
 
-  ecs_image_id = module.basic_image.image_id
+  ecs_image_id = var.ecs_images.basic
   key_name     = alicloud_key_pair.default.key_name
   tags         = local.common_tags
   instances = {
@@ -72,7 +72,7 @@ module "alluxio" {
   project     = var.project
   environment = var.environment
 
-  ecs_image_id = module.alluxio_image.image_id
+  ecs_image_id = var.ecs_images.alluxio
   key_name     = alicloud_key_pair.default.key_name
   tags         = local.common_tags
 
@@ -133,7 +133,7 @@ module "hive" {
 
   depends_on = [module.alluxio]
 
-  ecs_image_id            = module.hive_image.image_id
+  ecs_image_id            = var.ecs_images.hive
   consul_server_addresses = module.consul.server_addresses
   key_name                = alicloud_key_pair.default.key_name
 
@@ -177,7 +177,7 @@ module "presto" {
 
   depends_on = [module.alluxio, module.hive]
 
-  ecs_image_id            = module.presto_image.image_id
+  ecs_image_id            = var.ecs_images.presto
   consul_server_addresses = module.consul.server_addresses
   key_name                = alicloud_key_pair.default.key_name
 

@@ -10,6 +10,16 @@ variable "alicloud_cr_namespace" {
   type = string
 }
 
+output "images" {
+  value = {
+    "alluxio" = module.alluxio.image.vpc
+    "hadoop"  = module.hadoop.image.vpc
+    "hive"    = module.hive.image.vpc
+    "presto"  = module.presto.image.vpc
+    "spark"   = module.spark.image.vpc
+  }
+}
+
 module "alluxio" {
   source = "./modules/docker_image"
 
@@ -22,11 +32,6 @@ module "alluxio" {
     "tag"       = "${var.project}-${var.environment}"
   }
 }
-
-output "alluxio_image" {
-  value = module.alluxio.image
-}
-
 
 module "hadoop" {
   source = "./modules/docker_image"
@@ -44,11 +49,6 @@ module "hadoop" {
   }
 }
 
-output "hadoop_image" {
-  value = module.hadoop.image
-}
-
-
 module "hive" {
   source = "./modules/docker_image"
 
@@ -64,11 +64,6 @@ module "hive" {
     "tag"       = "${var.project}-${var.environment}"
   }
 }
-
-output "hive_image" {
-  value = module.hive.image
-}
-
 
 module "presto" {
   source = "./modules/docker_image"
@@ -86,11 +81,6 @@ module "presto" {
   }
 }
 
-output "presto_image" {
-  value = module.presto.image
-}
-
-
 module "spark" {
   source = "./modules/docker_image"
 
@@ -106,8 +96,4 @@ module "spark" {
     "repo"      = "spark"
     "tag"       = "${var.project}-${var.environment}"
   }
-}
-
-output "spark_image" {
-  value = module.spark.image
 }

@@ -6,24 +6,11 @@ variable "environment" {
   type = string
 }
 
-
-variable "alluxio_docker_image" {
+variable "ecs_images" {
   type = object({
-    public = string
-    vpc    = string
-  })
-}
-
-variable "hive_docker_image" {
-  type = object({
-    public = string
-    vpc    = string
-  })
-}
-
-variable "presto_docker_image" {
-  type = object({
-    public = string
-    vpc    = string
+    basic   = string
+    alluxio = string
+    hive    = string
+    presto  = string
   })
 }

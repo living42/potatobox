@@ -1,7 +1,7 @@
-module "basic_image" {
+module "basic" {
   source = "./modules/alicloud_image"
 
-  src           = "${path.module}/image/basic"
+  src           = "${path.module}/basic"
   setup         = "setup.sh"
   image_name    = "basic"
   source_image  = "debian_10_4_x64_20G_alibase_20200717.vhd"
@@ -11,20 +11,20 @@ module "basic_image" {
   }
 }
 
-module "alluxio_image" {
+module "alluxio" {
   source = "./modules/alicloud_image"
 
-  src           = "${path.module}/image/alluxio"
+  src           = "${path.module}/alluxio"
   setup         = "setup.sh"
   image_name    = "alluxio"
-  source_image  = module.basic_image.image_id
+  source_image  = module.basic.image_id
   instance_type = "ecs.n1.tiny"
   tags = {
     "project" = var.project
   }
 
   envs = {
-    "ALLUXIO_IMAGE" = var.alluxio_docker_image.vpc
+    "ALLUXIO_IMAGE" = var.docker_images.alluxio
   }
   envs_from_local_exec = {
     "CR_TEMP_USER_PASSWORD" : "aliyun cr GetAuthorizationToken | jq -r .data.authorizationToken"
@@ -32,20 +32,20 @@ module "alluxio_image" {
 }
 
 
-module "hive_image" {
+module "hive" {
   source = "./modules/alicloud_image"
 
-  src           = "${path.module}/image/hive"
+  src           = "${path.module}/hive"
   setup         = "setup.sh"
   image_name    = "hive"
-  source_image  = module.alluxio_image.image_id
+  source_image  = module.alluxio.image_id
   instance_type = "ecs.n1.tiny"
   tags = {
     "project" = var.project
   }
 
   envs = {
-    "HIVE_IMAGE" = var.hive_docker_image.vpc
+    "HIVE_IMAGE" = var.docker_images.hive
   }
   envs_from_local_exec = {
     "CR_TEMP_USER_PASSWORD" : "aliyun cr GetAuthorizationToken | jq -r .data.authorizationToken"
@@ -53,20 +53,20 @@ module "hive_image" {
 }
 
 
-module "presto_image" {
+module "presto" {
   source = "./modules/alicloud_image"
 
-  src           = "${path.module}/image/presto"
+  src           = "${path.module}/presto"
   setup         = "setup.sh"
   image_name    = "presto"
-  source_image  = module.alluxio_image.image_id
+  source_image  = module.alluxio.image_id
   instance_type = "ecs.n1.tiny"
   tags = {
     "project" = var.project
   }
 
   envs = {
-    "PRESTO_IMAGE" = var.presto_docker_image.vpc
+    "PRESTO_IMAGE" = var.docker_images.presto
   }
   envs_from_local_exec = {
     "CR_TEMP_USER_PASSWORD" : "aliyun cr GetAuthorizationToken | jq -r .data.authorizationToken"
