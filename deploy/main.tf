@@ -1,6 +1,5 @@
 provider "alicloud" {
-  version = "~> 1.95.0"
-  region  = "cn-shanghai"
+  region = "cn-shanghai"
 }
 
 locals {

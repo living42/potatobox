@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    alicloud = "~> 1.95.0"
+    local    = "~> 1.4.0"
+    random   = "~> 2.3.0"
+  }
+}
+
 variable "project" {
   type    = string
   default = "potatobox"
