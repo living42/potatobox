@@ -16,7 +16,7 @@ resource "alicloud_key_pair" "default" {
 }
 
 module "consul" {
-  source = "./modules/consul"
+  source = "./consul"
 
   project     = var.project
   environment = var.environment
@@ -66,7 +66,7 @@ resource "alicloud_oss_bucket" "alluxio_ufs" {
 }
 
 module "alluxio" {
-  source = "./modules/alluxio"
+  source = "./alluxio"
 
   project     = var.project
   environment = var.environment
@@ -125,7 +125,7 @@ module "alluxio" {
 }
 
 module "hive" {
-  source = "./modules/hive"
+  source = "./hive"
 
   project     = var.project
   environment = var.environment
@@ -171,7 +171,7 @@ module "hive" {
 }
 
 module "presto" {
-  source = "./modules/presto"
+  source = "./presto"
 
   project     = var.project
   environment = var.environment
