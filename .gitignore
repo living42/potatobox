@@ -1,4 +1,4 @@
 /.vscode/
 /.terraform
-/terraform.tfstate*
+/*.tfstate*
 /.logs/
