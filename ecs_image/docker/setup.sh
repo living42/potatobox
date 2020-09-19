@@ -40,7 +40,7 @@ auto_retry() {
 }
 
 auto_retry 10 120 \
-    axel -o /usr/local/bin/docker-compose \
+    wget -O /usr/local/bin/docker-compose \
         "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)"
 
 chmod +x /usr/local/bin/docker-compose

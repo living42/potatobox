@@ -11,13 +11,26 @@ module "basic" {
   }
 }
 
+module "docker" {
+  source = "./modules/alicloud_image"
+
+  src           = "${path.module}/docker"
+  setup         = "setup.sh"
+  image_name    = "docker"
+  source_image  = module.basic.image_id
+  instance_type = "ecs.n1.tiny"
+  tags = {
+    "project" = var.project
+  }
+}
+
 module "alluxio" {
   source = "./modules/alicloud_image"
 
   src           = "${path.module}/alluxio"
   setup         = "setup.sh"
   image_name    = "alluxio"
-  source_image  = module.basic.image_id
+  source_image  = module.docker.image_id
   instance_type = "ecs.n1.tiny"
   tags = {
     "project" = var.project
