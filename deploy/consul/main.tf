@@ -102,7 +102,10 @@ resource "alicloud_ram_policy" "consul_server" {
         "Effect": "Allow",
         "Resource": [
           "*"
-        ]
+        ],
+        "Condition": {
+          "StringEquals": ${jsonencode({ for k, v in local.consul_server_tags : "ecs:tag/${k}" => "${v}" })}
+        }
       }
     ],
     "Version": "1"
