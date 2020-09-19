@@ -1,8 +1,6 @@
-ENVS_FROM_LOCAL_EXEC=
-
 %{ for key, value in items }
 VAL="$(${value})"
-ENVS_FROM_LOCAL_EXEC="export ${key}=$${VAL} $${ENVS_FROM_LOCAL_EXEC};"
+INJECT_SCRIPTS="export ${key}=$${VAL} $${INJECT_SCRIPTS};"
 %{ endfor }
 
-export ENVS_FROM_LOCAL_EXEC
+export INJECT_SCRIPTS
