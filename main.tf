@@ -1,4 +1,5 @@
 terraform {
+  required_version = "0.13.3"
   required_providers {
     alicloud = "~> 1.95.0"
     local    = "~> 1.4.0"
