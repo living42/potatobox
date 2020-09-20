@@ -4,6 +4,14 @@ terraform {
     local    = "~> 1.4.0"
     random   = "~> 2.3.0"
   }
+
+  backend "oss" {
+    bucket  = "living42"
+    prefix  = "potatobox/state"
+    key     = "terraform.tfstate"
+    region  = "cn-hangzhou"
+    encrypt = true
+  }
 }
 
 variable "project" {
