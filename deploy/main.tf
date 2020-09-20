@@ -24,6 +24,10 @@ module "consul" {
   ecs_image_id = var.ecs_images.basic
   key_name     = alicloud_key_pair.default.key_name
   tags         = local.common_tags
+
+  scripts_location  = local.scripts_location
+  ram_role_policies = [alicloud_ram_policy.scripts]
+
   instances = {
     "consul-1" = {
       "instance_type"      = "ecs.t5-lc2m1.nano",
@@ -60,7 +64,7 @@ resource "random_id" "alluxio_ufs_oss_bucket_suffix" {
 }
 
 resource "alicloud_oss_bucket" "alluxio_ufs" {
-  bucket        = "${var.project}-${random_id.alluxio_ufs_oss_bucket_suffix.hex}"
+  bucket        = "${var.project}-${var.environment}-${random_id.alluxio_ufs_oss_bucket_suffix.hex}"
   force_destroy = true
   tags          = local.common_tags
 }
@@ -81,6 +85,9 @@ module "alluxio" {
     "bucket_name"       = alicloud_oss_bucket.alluxio_ufs.id
     "intranet_endpoint" = alicloud_oss_bucket.alluxio_ufs.intranet_endpoint
   }
+
+  scripts_location  = local.scripts_location
+  ram_role_policies = [alicloud_ram_policy.scripts]
 
   master_instances = {
     "alluxio-1" = {
@@ -136,6 +143,9 @@ module "hive" {
   consul_server_addresses = module.consul.server_addresses
   key_name                = alicloud_key_pair.default.key_name
 
+  scripts_location  = local.scripts_location
+  ram_role_policies = [alicloud_ram_policy.scripts]
+
   vpc_id = alicloud_vpc.main.id
 
   tags = local.common_tags
@@ -181,6 +191,9 @@ module "presto" {
   ecs_image_id            = var.ecs_images.presto
   consul_server_addresses = module.consul.server_addresses
   key_name                = alicloud_key_pair.default.key_name
+
+  scripts_location  = local.scripts_location
+  ram_role_policies = [alicloud_ram_policy.scripts]
 
   tags = local.common_tags
 

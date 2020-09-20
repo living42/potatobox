@@ -103,6 +103,14 @@ resource "alicloud_ram_role_policy_attachment" "alluxio_server" {
   role_name   = alicloud_ram_role.alluxio_server.name
 }
 
+resource "alicloud_ram_role_policy_attachment" "base" {
+  for_each = { for i in var.ram_role_policies : i.name => i.type }
+
+  policy_name = each.key
+  policy_type = each.value
+  role_name   = alicloud_ram_role.alluxio_server.name
+}
+
 # setup masters
 
 resource "alicloud_instance" "masters" {
@@ -121,10 +129,17 @@ resource "alicloud_instance" "masters" {
   user_data            = <<-EOT
     #!/bin/sh
     set -xe
-    SCRIPTS=/root/scripts
+    export HOME=/root
+    cd $HOME
+
+    setup-aliyun-cli.sh
+
+    aliyun oss cp ${var.scripts_location} scripts.zip
+    unzip scripts.zip -d scripts
+    SCRIPTS=$PWD/scripts
+
     bash $SCRIPTS/setup-disk.sh /dev/vdb /data
     bash $SCRIPTS/setup-consul.sh client '${jsonencode(var.consul_server_addresses)}'
-    bash $SCRIPTS/setup-aliyun-cli.sh
 
     ACCESS_KEY="$(bash $SCRIPTS/get-or-create-access-key.sh \
       services/alluxio/alicloud_ram_access_key/${alicloud_ram_user.alluxio.id} \
@@ -201,10 +216,17 @@ resource "alicloud_instance" "workers" {
   user_data            = <<-EOT
     #!/bin/sh
     set -xe
-    SCRIPTS=/root/scripts
+    export HOME=/root
+    cd $HOME
+
+    setup-aliyun-cli.sh
+
+    aliyun oss cp ${var.scripts_location} scripts.zip
+    unzip scripts.zip -d scripts
+    SCRIPTS=$PWD/scripts
+
     bash $SCRIPTS/setup-disk.sh /dev/vdb /data
     bash $SCRIPTS/setup-consul.sh client '${jsonencode(var.consul_server_addresses)}'
-    bash $SCRIPTS/setup-aliyun-cli.sh
 
     ACCESS_KEY="$(bash $SCRIPTS/get-or-create-access-key.sh \
       services/alluxio/alicloud_ram_access_key/${alicloud_ram_user.alluxio.id} \

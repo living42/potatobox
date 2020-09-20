@@ -44,3 +44,11 @@ variable "instances" {
     spot_price_limit   = number
   }))
 }
+
+variable "scripts_location" {
+  type = string
+}
+
+variable "ram_role_policies" {
+  type = list(object({ name = string, type = string }))
+}

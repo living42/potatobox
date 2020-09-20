@@ -71,6 +71,36 @@ resource "alicloud_eip_association" "jumpserver_eip" {
   instance_id   = alicloud_instance.jumpserver.id
 }
 
+resource "alicloud_ram_role" "jumpserver" {
+  name        = "${var.project}-${var.environment}-jumpserver"
+  document    = <<EOF
+  {
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole",
+        "Effect": "Allow",
+        "Principal": {
+          "Service": [
+            "ecs.aliyuncs.com"
+          ]
+        }
+      }
+    ],
+    "Version": "1"
+  }
+  EOF
+  description = "role of jumpserver for potatobox"
+  force       = true
+}
+
+resource "alicloud_ram_role_policy_attachment" "base" {
+  for_each = { for i in [alicloud_ram_policy.scripts] : i.name => i.type }
+
+  policy_name = each.key
+  policy_type = each.value
+  role_name   = alicloud_ram_role.jumpserver.name
+}
+
 resource "alicloud_instance" "jumpserver" {
   instance_name        = "jumpserver"
   image_id             = var.ecs_images.basic
@@ -83,12 +113,21 @@ resource "alicloud_instance" "jumpserver" {
     alicloud_security_group.default.id,
     alicloud_security_group.jumpserver.id
   ]
-  key_name = alicloud_key_pair.default.key_name
+  key_name  = alicloud_key_pair.default.key_name
+  role_name = alicloud_ram_role.jumpserver.id
 
   user_data = <<-EOT
     #!/bin/sh
     set -xe
-    SCRIPTS=/root/scripts
+    export HOME=/root
+    cd $HOME
+
+    setup-aliyun-cli.sh
+
+    aliyun oss cp ${local.scripts_location} scripts.zip
+    unzip scripts.zip -d scripts
+    SCRIPTS=$PWD/scripts
+
     bash $SCRIPTS/setup-consul.sh client '${jsonencode(module.consul.server_addresses)}'
   EOT
 

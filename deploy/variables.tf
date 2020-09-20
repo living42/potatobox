@@ -14,3 +14,10 @@ variable "ecs_images" {
     presto  = string
   })
 }
+
+variable "scripts_bucket" {
+  type = object({
+    id = string
+  })
+}
+

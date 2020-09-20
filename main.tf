@@ -3,6 +3,7 @@ terraform {
     alicloud = "~> 1.95.0"
     local    = "~> 1.4.0"
     random   = "~> 2.3.0"
+    archive  = "~> 1.3.0"
   }
 
   backend "oss" {
@@ -57,4 +58,6 @@ module "deploy" {
   environment = var.environment
 
   ecs_images = module.ecs_image.images
+
+  scripts_bucket = module.infra.scripts_bucket
 }

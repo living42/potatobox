@@ -27,9 +27,16 @@ resource "alicloud_instance" "consul_servers" {
   user_data            = <<-EOT
     #!/bin/sh
     set -xe
-    SCRIPTS=/root/scripts
+    export HOME=/root
+    cd $HOME
+
+    setup-aliyun-cli.sh
+
+    aliyun oss cp ${var.scripts_location} scripts.zip
+    unzip scripts.zip -d scripts
+    SCRIPTS=$PWD/scripts
+
     bash $SCRIPTS/setup-disk.sh /dev/vdb /data
-    bash $SCRIPTS/setup-aliyun-cli.sh
     bash $SCRIPTS/setup-consul.sh server /data/consul "${local.consul_server_node_tags_cli_flags}"
   EOT
 
@@ -118,5 +125,13 @@ resource "alicloud_ram_policy" "consul_server" {
 resource "alicloud_ram_role_policy_attachment" "consul_server" {
   policy_name = alicloud_ram_policy.consul_server.name
   policy_type = alicloud_ram_policy.consul_server.type
+  role_name   = alicloud_ram_role.consul_server.name
+}
+
+resource "alicloud_ram_role_policy_attachment" "base" {
+  for_each = { for i in var.ram_role_policies : i.name => i.type }
+
+  policy_name = each.key
+  policy_type = each.value
   role_name   = alicloud_ram_role.consul_server.name
 }

@@ -30,3 +30,11 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+
+variable "scripts_location" {
+  type = string
+}
+
+variable "ram_role_policies" {
+  type = list(object({ name = string, type = string }))
+}

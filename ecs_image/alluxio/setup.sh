@@ -1,9 +1,6 @@
 #!/bin/sh
 set -xeu
 
-cp -r scripts/* /root/scripts/
-
-
 # Pull container images
 echo "${CR_TEMP_USER_PASSWORD}" | docker login \
     --username cr_temp_user \

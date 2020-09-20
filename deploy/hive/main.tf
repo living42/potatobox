@@ -29,10 +29,17 @@ resource "alicloud_instance" "metastore" {
   user_data = <<-EOT
     #!/bin/sh
     set -xe
-    SCRIPTS=/root/scripts
+    export HOME=/root
+    cd $HOME
+
+    setup-aliyun-cli.sh
+
+    aliyun oss cp ${var.scripts_location} scripts.zip
+    unzip scripts.zip -d scripts
+    SCRIPTS=$PWD/scripts
+
     bash $SCRIPTS/setup-consul.sh client '${jsonencode(var.consul_server_addresses)}'
     bash $SCRIPTS/setup-alluxio-client.sh
-    bash $SCRIPTS/setup-aliyun-cli.sh
     bash $SCRIPTS/setup-hive.sh ${alicloud_db_instance.hive.id} ${alicloud_db_database.hive.name}
   EOT
 
@@ -115,5 +122,13 @@ resource "alicloud_ram_policy" "hive" {
 resource "alicloud_ram_role_policy_attachment" "hive" {
   policy_name = alicloud_ram_policy.hive.name
   policy_type = alicloud_ram_policy.hive.type
+  role_name   = alicloud_ram_role.hive.name
+}
+
+resource "alicloud_ram_role_policy_attachment" "base" {
+  for_each = { for i in var.ram_role_policies : i.name => i.type }
+
+  policy_name = each.key
+  policy_type = each.value
   role_name   = alicloud_ram_role.hive.name
 }
