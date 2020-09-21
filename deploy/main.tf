@@ -15,8 +15,19 @@ resource "alicloud_key_pair" "default" {
   public_key = file("${path.module}/.secrets/ssh_key.pub")
 }
 
+module "scripts" {
+  source = "./scripts"
+
+  project     = var.project
+  environment = var.environment
+
+  scripts_bucket = var.scripts_bucket
+}
+
 module "consul" {
   source = "./consul"
+
+  depends_on = [module.scripts]
 
   project     = var.project
   environment = var.environment
@@ -25,8 +36,8 @@ module "consul" {
   key_name     = alicloud_key_pair.default.key_name
   tags         = local.common_tags
 
-  scripts_location  = local.scripts_location
-  ram_role_policies = [alicloud_ram_policy.scripts]
+  scripts_location  = module.scripts.location
+  ram_role_policies = [module.scripts.ram_policy]
 
   instances = {
     "consul-1" = {
@@ -72,6 +83,8 @@ resource "alicloud_oss_bucket" "alluxio_ufs" {
 module "alluxio" {
   source = "./alluxio"
 
+  depends_on = [module.scripts, module.consul]
+
   project     = var.project
   environment = var.environment
 
@@ -86,8 +99,8 @@ module "alluxio" {
     "intranet_endpoint" = alicloud_oss_bucket.alluxio_ufs.intranet_endpoint
   }
 
-  scripts_location  = local.scripts_location
-  ram_role_policies = [alicloud_ram_policy.scripts]
+  scripts_location  = module.scripts.location
+  ram_role_policies = [module.scripts.ram_policy]
 
   master_instances = {
     "alluxio-1" = {
@@ -134,17 +147,17 @@ module "alluxio" {
 module "hive" {
   source = "./hive"
 
+  depends_on = [module.scripts, module.consul, module.alluxio]
+
   project     = var.project
   environment = var.environment
-
-  depends_on = [module.alluxio]
 
   ecs_image_id            = var.ecs_images.hive
   consul_server_addresses = module.consul.server_addresses
   key_name                = alicloud_key_pair.default.key_name
 
-  scripts_location  = local.scripts_location
-  ram_role_policies = [alicloud_ram_policy.scripts]
+  scripts_location  = module.scripts.location
+  ram_role_policies = [module.scripts.ram_policy]
 
   vpc_id = alicloud_vpc.main.id
 
@@ -183,17 +196,17 @@ module "hive" {
 module "presto" {
   source = "./presto"
 
+  depends_on = [module.scripts, module.consul, module.hive]
+
   project     = var.project
   environment = var.environment
-
-  depends_on = [module.alluxio, module.hive]
 
   ecs_image_id            = var.ecs_images.presto
   consul_server_addresses = module.consul.server_addresses
   key_name                = alicloud_key_pair.default.key_name
 
-  scripts_location  = local.scripts_location
-  ram_role_policies = [alicloud_ram_policy.scripts]
+  scripts_location  = module.scripts.location
+  ram_role_policies = [module.scripts.ram_policy]
 
   tags = local.common_tags
 

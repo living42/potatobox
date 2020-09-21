@@ -94,10 +94,8 @@ resource "alicloud_ram_role" "jumpserver" {
 }
 
 resource "alicloud_ram_role_policy_attachment" "base" {
-  for_each = { for i in [alicloud_ram_policy.scripts] : i.name => i.type }
-
-  policy_name = each.key
-  policy_type = each.value
+  policy_name = module.scripts.ram_policy.name
+  policy_type = module.scripts.ram_policy.type
   role_name   = alicloud_ram_role.jumpserver.name
 }
 
@@ -124,7 +122,7 @@ resource "alicloud_instance" "jumpserver" {
 
     setup-aliyun-cli.sh
 
-    aliyun oss cp ${local.scripts_location} scripts.zip
+    aliyun oss cp ${module.scripts.location} scripts.zip
     unzip scripts.zip -d scripts
     SCRIPTS=$PWD/scripts
 

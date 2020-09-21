@@ -2,4 +2,4 @@
 /.terraform
 /*.tfstate*
 /.logs/
-/deploy/.tmp/
+/deploy/scripts/.tmp/

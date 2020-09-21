@@ -1,6 +1,6 @@
 data "archive_file" "scripts" {
   type        = "zip"
-  source_dir  = "${path.module}/scripts"
+  source_dir  = "${path.module}/src"
   output_path = "${path.module}/.tmp/scripts.zip"
 }
 
@@ -29,8 +29,4 @@ resource "alicloud_ram_policy" "scripts" {
   }
   EOF
   force    = true
-}
-
-locals {
-  scripts_location = "oss://${var.scripts_bucket.id}/${alicloud_oss_bucket_object.scripts.key}"
 }
