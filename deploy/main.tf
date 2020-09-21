@@ -70,6 +70,37 @@ module "consul" {
   }
 }
 
+module "bastion" {
+  source = "./bastion"
+
+  depends_on = [module.scripts, module.consul]
+
+  project      = var.project
+  environment  = var.environment
+  ecs_image_id = var.ecs_images.basic
+  key_name     = alicloud_key_pair.default.key_name
+  tags         = local.common_tags
+
+  vpc_id = alicloud_vpc.main.id
+
+  instances = {
+    "bustion-1" = {
+      "instance_type"      = "ecs.t5-lc2m1.nano",
+      "vswitch_id"         = alicloud_vswitch.e.id,
+      "security_groups"    = [alicloud_security_group.default.id],
+      "data_disk_category" = "cloud_efficiency",
+      "data_disk_size"     = 20,
+      "spot_strategy"      = "SpotAsPriceGo",
+      "spot_price_limit"   = 0.12,
+    }
+  }
+
+  scripts_location  = module.scripts.location
+  ram_role_policies = [module.scripts.ram_policy]
+
+  consul_server_addresses = module.consul.server_addresses
+}
+
 resource "random_id" "alluxio_ufs_oss_bucket_suffix" {
   byte_length = 4
 }
@@ -255,21 +286,4 @@ module "presto" {
       "spot_price_limit"   = 0.12,
     }
   }
-}
-
-resource "local_file" "ssh_config" {
-  content = templatefile("${path.module}/helpers/ssh_config.tpl", {
-    "ssh_priv_key_file" = "${path.module}/.secrets/ssh_key"
-    "jumpserver" = {
-      "ip" = alicloud_eip.jumpserver_eip.ip_address
-    },
-    "internal_instances" = concat(
-      module.consul.instances,
-      module.alluxio.master_instances,
-      module.alluxio.worker_instances,
-      module.hive.metastore_instances,
-      module.presto.instances
-    )
-  })
-  filename = "${path.module}/.secrets/ssh_config"
 }
