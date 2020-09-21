@@ -77,3 +77,7 @@ output "vault_recovery_key_url" {
 output "vault_initial_root_token_url" {
   value = module.deploy.vault_initial_root_token_url
 }
+
+output "bastion_ips" {
+  value = module.deploy.bastion_ips
+}

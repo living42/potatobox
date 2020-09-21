@@ -1,3 +1,3 @@
-output "instances" {
-  value = [for k, v in alicloud_instance.bastion : v.public_ip]
+output "ips" {
+  value = { for k, v in alicloud_instance.bastion : k => v.public_ip }
 }
