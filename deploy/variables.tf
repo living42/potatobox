@@ -21,3 +21,10 @@ variable "scripts_bucket" {
   })
 }
 
+variable "vault_kms_key_id" {
+  type = string
+}
+
+variable "vault_pgp_key" {
+  type = string
+}

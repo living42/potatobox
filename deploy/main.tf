@@ -104,6 +104,47 @@ module "bastion" {
   consul_server_addresses = module.consul.server_addresses
 }
 
+module "vault" {
+  source = "./vault"
+
+  depends_on = [module.scripts, module.consul]
+
+  project      = var.project
+  environment  = var.environment
+  ecs_image_id = var.ecs_images.basic
+  key_name     = alicloud_key_pair.default.key_name
+  tags         = local.common_tags
+
+  kms_key_id = var.vault_kms_key_id
+  pgp_key    = var.vault_pgp_key
+
+  scripts_location  = module.scripts.location
+  ram_role_policies = [module.scripts.ram_policy]
+
+  consul_server_addresses = module.consul.server_addresses
+
+  instances = {
+    "vault-1" = {
+      "instance_type"      = "ecs.t5-lc2m1.nano",
+      "vswitch_id"         = alicloud_vswitch.e.id,
+      "security_groups"    = [alicloud_security_group.default.id],
+      "data_disk_category" = "cloud_efficiency",
+      "data_disk_size"     = 20,
+      "spot_strategy"      = "SpotAsPriceGo",
+      "spot_price_limit"   = 0.12,
+    }
+    "vault-2" = {
+      "instance_type"      = "ecs.t5-lc2m1.nano",
+      "vswitch_id"         = alicloud_vswitch.f.id,
+      "security_groups"    = [alicloud_security_group.default.id],
+      "data_disk_category" = "cloud_efficiency",
+      "data_disk_size"     = 20,
+      "spot_strategy"      = "SpotAsPriceGo",
+      "spot_price_limit"   = 0.12,
+    }
+  }
+}
+
 resource "random_id" "alluxio_ufs_oss_bucket_suffix" {
   byte_length = 4
 }

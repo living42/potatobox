@@ -1,7 +1,16 @@
+locals {
+  // alicloud_oss_bucket_object could not check file changes, use this technique to trigger re-upload
+  // the downside is we are left many old file in ${path.module}/.tmp, is could not clean automatically
+  hash = sha256(join("", [
+    for i in fileset("${path.module}/src", "**") :
+    "${i}:${filesha256("${path.module}/src/${i}")}"
+  ]))
+}
+
 data "archive_file" "scripts" {
   type        = "zip"
   source_dir  = "${path.module}/src"
-  output_path = "${path.module}/.tmp/scripts.zip"
+  output_path = "${path.module}/.tmp/scripts_${local.hash}.zip"
 }
 
 resource "alicloud_oss_bucket_object" "scripts" {

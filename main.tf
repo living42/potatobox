@@ -26,6 +26,10 @@ variable "environment" {
   default = "develop"
 }
 
+variable "pgp_key" {
+  type    = string
+  default = "keybase:living42"
+}
 
 module "infra" {
   source = "./infra"
@@ -61,4 +65,15 @@ module "deploy" {
   ecs_images = module.ecs_image.images
 
   scripts_bucket = module.infra.scripts_bucket
+
+  vault_kms_key_id = module.infra.vault_kms_key_id
+  vault_pgp_key    = var.pgp_key
+}
+
+output "vault_recovery_key_url" {
+  value = module.deploy.vault_recovery_key_url
+}
+
+output "vault_initial_root_token_url" {
+  value = module.deploy.vault_initial_root_token_url
 }
