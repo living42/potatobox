@@ -49,18 +49,10 @@ resource "alicloud_instance" "consul_servers" {
   volume_tags = local.consul_server_tags
 }
 
-data "alicloud_vswitches" "vswitches" {
-  ids = [for k, v in var.instances : v.vswitch_id]
-}
-
-locals {
-  vswitch_zone_map = { for v in data.alicloud_vswitches.vswitches.vswitches : v.id => v.zone_id }
-}
-
 resource "alicloud_disk" "consul_server_disks" {
   for_each = var.instances
 
-  availability_zone = local.vswitch_zone_map[each.value.vswitch_id]
+  availability_zone = each.value.data_disk_availability_zone
   name              = "${each.key}-data-disk"
   category          = each.value.data_disk_category
   size              = each.value.data_disk_size
