@@ -59,8 +59,6 @@ module "deploy" {
 
   ecs_images = module.ecs_image.images
 
-  scripts_bucket = module.infra.scripts_bucket
-
   vault_kms_key_id = module.infra.vault_kms_key_id
 }
 

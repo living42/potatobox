@@ -15,12 +15,6 @@ variable "ecs_images" {
   })
 }
 
-variable "scripts_bucket" {
-  type = object({
-    id = string
-  })
-}
-
 variable "vault_kms_key_id" {
   type = string
 }

@@ -20,8 +20,7 @@ module "scripts" {
 
   project     = var.project
   environment = var.environment
-
-  scripts_bucket = var.scripts_bucket
+  tags        = local.common_tags
 }
 
 module "consul" {

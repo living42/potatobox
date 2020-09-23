@@ -13,8 +13,20 @@ data "archive_file" "scripts" {
   output_path = "${path.module}/.tmp/scripts_${local.hash}.zip"
 }
 
+
+resource "random_id" "scripts_bucket_suffix" {
+  byte_length = 4
+}
+
+resource "alicloud_oss_bucket" "scripts" {
+  bucket        = "${var.project}-${var.environment}-scripts-${random_id.scripts_bucket_suffix.hex}"
+  force_destroy = true
+  tags          = var.tags
+}
+
+
 resource "alicloud_oss_bucket_object" "scripts" {
-  bucket = var.scripts_bucket.id
+  bucket = alicloud_oss_bucket.scripts.id
   key    = "scripts.zip"
   source = data.archive_file.scripts.output_path
 }
@@ -30,7 +42,7 @@ resource "alicloud_ram_policy" "scripts" {
         ],
         "Effect": "Allow",
         "Resource": [
-          "acs:oss:*:*:${var.scripts_bucket.id}/*"
+          "acs:oss:*:*:${alicloud_oss_bucket.scripts.id}/*"
         ]
       }
     ],

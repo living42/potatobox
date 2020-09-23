@@ -1,5 +1,5 @@
 output "location" {
-  value = "oss://${var.scripts_bucket.id}/${alicloud_oss_bucket_object.scripts.key}"
+  value = "oss://${alicloud_oss_bucket.scripts.id}/${alicloud_oss_bucket_object.scripts.key}"
 }
 
 output "ram_policy" {

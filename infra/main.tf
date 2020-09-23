@@ -28,20 +28,6 @@ output "alicloud_cr_namespace" {
   value = alicloud_cr_namespace.docker_image_registry.id
 }
 
-resource "random_id" "scripts_bucket_suffix" {
-  byte_length = 4
-}
-
-resource "alicloud_oss_bucket" "scripts" {
-  bucket        = "${var.project}-${var.environment}-scripts-${random_id.scripts_bucket_suffix.hex}"
-  force_destroy = true
-  tags          = local.common_tags
-}
-
-output "scripts_bucket" {
-  value = alicloud_oss_bucket.scripts
-}
-
 resource "alicloud_kms_key" "vault_kms" {
   description = "Vault KMS For ${var.project}/${var.environment}"
 

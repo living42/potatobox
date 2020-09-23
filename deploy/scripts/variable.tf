@@ -6,8 +6,6 @@ variable "environment" {
   type = string
 }
 
-variable "scripts_bucket" {
-  type = object({
-    id = string
-  })
+variable "tags" {
+  type = map(string)
 }
