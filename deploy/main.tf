@@ -116,7 +116,6 @@ module "vault" {
   tags         = local.common_tags
 
   kms_key_id = var.vault_kms_key_id
-  pgp_key    = var.vault_pgp_key
 
   scripts_location  = module.scripts.location
   ram_role_policies = [module.scripts.ram_policy]

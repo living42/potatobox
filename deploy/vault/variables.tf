@@ -26,10 +26,6 @@ variable "kms_key_id" {
   type = string
 }
 
-variable "pgp_key" {
-  type = string
-}
-
 variable "scripts_location" {
   type = string
 }

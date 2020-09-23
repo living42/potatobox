@@ -7,11 +7,3 @@ output "instances" {
     }
   ]
 }
-
-output "recovery_key_url" {
-  value = "oss://${alicloud_oss_bucket.vault_init_result.id}/vault-recovery-key"
-}
-
-output "initial_root_token_url" {
-  value = "oss://${alicloud_oss_bucket.vault_init_result.id}/vault-initial-root-token"
-}

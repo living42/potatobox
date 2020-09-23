@@ -39,22 +39,10 @@ resource "alicloud_instance" "instances" {
     SCRIPTS=$PWD/scripts
 
     bash $SCRIPTS/setup-consul.sh client '${jsonencode(var.consul_server_addresses)}'
-    bash $SCRIPTS/setup-vault-server.sh \
-      ${var.kms_key_id} ${var.pgp_key} ${alicloud_oss_bucket.vault_init_result.id}
+    bash $SCRIPTS/setup-vault-server.sh ${var.kms_key_id}
   EOT
 
   depends_on = [alicloud_ram_role_policy_attachment.vault]
-}
-
-resource "random_id" "vault_init_result_bucket_suffix" {
-  byte_length = 4
-}
-
-// bucket to store encrypted unseal key and root token
-resource "alicloud_oss_bucket" "vault_init_result" {
-  bucket        = "${var.project}-${var.environment}-vault-${random_id.vault_init_result_bucket_suffix.hex}"
-  force_destroy = true
-  tags          = local.tags
 }
 
 resource "alicloud_ram_role" "vault" {
@@ -95,15 +83,6 @@ resource "alicloud_ram_policy" "vault" {
         "Effect": "Allow",
         "Resource": [
           "acs:kms:*:*:key/${var.kms_key_id}"
-        ]
-      },
-      {
-        "Action": [
-          "oss:PutObject"
-        ],
-        "Effect": "Allow",
-        "Resource": [
-          "acs:oss:*:*:${alicloud_oss_bucket.vault_init_result.id}/*"
         ]
       }
     ],
