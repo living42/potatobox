@@ -22,7 +22,6 @@ or head to the official repo: https://github.com/aliyun/aliyun-cli
 
 And you should run `aliyun configure` give it the right credentials. this project required you using root Access Key to make it work.
 
-
 #### Install Docker
 
 This project reliant Docker to build and push Container Images. you have to choice:
@@ -71,6 +70,15 @@ terraform init
 
 You gonna using `vault` command to control all secrets. head to https://www.vaultproject.io/docs/install
 
+#### Install jq
+
+For macOS with Homebrew
+
+```
+brew install jq
+```
+
+Other distro are pretty easy too
 
 ### Get Started
 
